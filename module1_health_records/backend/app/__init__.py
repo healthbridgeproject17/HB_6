@@ -27,6 +27,14 @@ def create_app(config_class=Config):
     from .routes.patients import bp as patients_bp
     app.register_blueprint(patients_bp, url_prefix="/api/v1/patients")
 
+    from .routes.records import bp as records_bp
+    from .routes.prescriptions import bp as prescriptions_bp
+    app.register_blueprint(records_bp, url_prefix="/api/v1")
+    app.register_blueprint(prescriptions_bp, url_prefix="/api/v1")
+
+    from .routes.medication import bp as medication_bp
+    app.register_blueprint(medication_bp, url_prefix="/api/v1")
+
     from flask import jsonify
 
     @app.errorhandler(413)

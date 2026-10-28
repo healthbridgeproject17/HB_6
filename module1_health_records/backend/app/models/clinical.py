@@ -1,5 +1,5 @@
 from ..extensions import db
-from .user import utcnow
+from .user import Doctor, utcnow  # noqa: F401
 
 
 class MedicalRecord(db.Model):
@@ -15,6 +15,11 @@ class MedicalRecord(db.Model):
     title = db.Column(db.String(200), nullable=False)
     details = db.Column(db.Text)
     amended_from_id = db.Column(db.Integer, db.ForeignKey("medical_records.id"))
+    created_by_user_id = db.Column(
+        db.Integer, db.ForeignKey("users.id", name="fk_medical_records_created_by")
+    )
+    amendment_reason = db.Column(db.String(500))
+    doctor = db.relationship("Doctor", lazy="joined")
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
 
 
@@ -49,6 +54,11 @@ class Prescription(db.Model):
     # draft = not yet verified by a doctor (e.g. from OCR); only doctors confirm
     status = db.Column(db.String(20), nullable=False, default="draft")
     source_document_id = db.Column(db.Integer, db.ForeignKey("documents.id"))
+    confirmed_by_doctor_id = db.Column(
+        db.Integer, db.ForeignKey("doctors.id", name="fk_prescriptions_confirmed_by")
+    )
+    confirmed_at = db.Column(db.DateTime(timezone=True))
+    doctor = db.relationship("Doctor", foreign_keys=[doctor_id], lazy="joined")
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
 
     __table_args__ = (
