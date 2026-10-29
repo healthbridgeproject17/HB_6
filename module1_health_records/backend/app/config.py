@@ -23,13 +23,14 @@ BASE_UPLOAD_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", 
 class Config:
     UPLOAD_FOLDER = BASE_UPLOAD_DIR
     MAX_PHOTO_BYTES = 2 * 1024 * 1024  # 2 MB
+    MAX_DOCUMENT_BYTES = 10 * 1024 * 1024  # 10 MB per report/prescription
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret")
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-jwt-secret")
     SQLALCHEMY_DATABASE_URI = _database_url()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=8)
     CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",")
-    MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10 MB upload limit
+    MAX_CONTENT_LENGTH = 12 * 1024 * 1024  # whole request (file + form overhead)
 
 
 class TestConfig(Config):

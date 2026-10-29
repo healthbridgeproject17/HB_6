@@ -41,3 +41,29 @@ def register_cli(app):
         admin.set_password(password)
         db.session.commit()
         click.echo("Admin password updated.")
+
+
+    @app.cli.command("create-admin")
+    @click.option("--name", prompt="Admin name")
+    @click.option("--email", prompt="Admin email")
+    @click.password_option(prompt="Password")
+    def create_admin(name, email, password):
+        """Create an additional admin account. Admins can only be created here,
+        on the server, never through the website."""
+        from .utils.validators import clean_email, password_problem
+
+        clean = clean_email(email)
+        if not clean:
+            raise click.ClickException("Enter a valid email address.")
+        problem = password_problem(password)
+        if problem:
+            raise click.ClickException(problem)
+        if len(name.strip()) < 2:
+            raise click.ClickException("Name must be at least 2 characters.")
+        if User.query.filter_by(email=clean).first():
+            raise click.ClickException("An account with this email already exists.")
+        admin = User(name=name.strip(), email=clean, role="admin")
+        admin.set_password(password)
+        db.session.add(admin)
+        db.session.commit()
+        click.echo(f"Admin created: {clean}")

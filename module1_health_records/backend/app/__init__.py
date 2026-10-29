@@ -35,6 +35,9 @@ def create_app(config_class=Config):
     from .routes.medication import bp as medication_bp
     app.register_blueprint(medication_bp, url_prefix="/api/v1")
 
+    from .routes.documents import bp as documents_bp
+    app.register_blueprint(documents_bp, url_prefix="/api/v1")
+
     from flask import jsonify
 
     @app.errorhandler(413)
