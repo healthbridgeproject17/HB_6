@@ -4,6 +4,8 @@ import secrets
 
 from PIL import Image, ImageOps
 
+from .crypto import encrypt_bytes
+
 Image.MAX_IMAGE_PIXELS = 25_000_000  # refuse decompression bombs
 
 ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png", "webp"}
@@ -54,7 +56,7 @@ def save_photo(upload_folder, patient_id, jpeg_bytes):
     os.makedirs(photos_dir, exist_ok=True)
     rel = os.path.join("photos", f"patient_{patient_id}_{secrets.token_hex(8)}.jpg")
     with open(os.path.join(upload_folder, rel), "wb") as fh:
-        fh.write(jpeg_bytes)
+        fh.write(encrypt_bytes(jpeg_bytes))
     return rel
 
 

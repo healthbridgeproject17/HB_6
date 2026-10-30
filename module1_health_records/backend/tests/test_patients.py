@@ -48,6 +48,8 @@ def make_doctor(client):
     t = login(client, "admin@test.com", "AdminPass1")
     client.post("/api/v1/admin/doctors", headers=auth(t), json={
         "name": "Dr Test", "email": "doc@test.com", "password": "Doctor1234"})
+    User.query.filter_by(role="doctor").update({"must_change_password": False})
+    db.session.commit()
     return login(client, "doc@test.com", "Doctor1234")
 
 

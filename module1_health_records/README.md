@@ -7,3 +7,6 @@ Run order (two PowerShell windows):
 
 The website forwards /api calls to the API (see frontend/vite.config.js).
 Roles: patient, doctor, admin. Permissions are enforced by the backend.
+
+Demo data:  cd backend ; .\.venv\Scripts\flask.exe --app run seed-demo   (see docs/DEMO_DATA.md)
+Security:   see docs/SECURITY.md

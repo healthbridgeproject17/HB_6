@@ -1,0 +1,1 @@
+A text file. Only PDF, JPG, PNG and WEBP are accepted.

@@ -8,6 +8,7 @@ from .extensions import db, jwt, migrate
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
+    _check_production_settings(app)
 
     CORS(app, resources={r"/api/*": {"origins": app.config["CORS_ORIGINS"]}})
 
@@ -44,7 +45,51 @@ def create_app(config_class=Config):
     def too_large(_):
         return jsonify(error="File is too large."), 413
 
+    @app.errorhandler(404)
+    def not_found(_):
+        return jsonify(error="Not found."), 404
+
+    @app.errorhandler(405)
+    def not_allowed(_):
+        return jsonify(error="Method not allowed."), 405
+
+    @app.errorhandler(500)
+    def server_error(exc):
+        # details go to the server log only, never to the browser
+        app.logger.exception("Unhandled error: %s", exc)
+        return jsonify(error="Something went wrong on the server."), 500
+
+    @app.after_request
+    def security_headers(response):
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Referrer-Policy", "no-referrer")
+        response.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=()")
+        # patient data must never sit in a shared cache
+        response.headers["Cache-Control"] = "no-store"
+        if app.config["ENV_NAME"] == "production":
+            response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+        return response
+
     from .cli import register_cli
     register_cli(app)
 
     return app
+
+
+def _check_production_settings(app):
+    """In production, refuse to start with weak or default secrets."""
+    cfg = app.config
+    if cfg["ENV_NAME"] != "production":
+        return
+    problems = []
+    for key in ("SECRET_KEY", "JWT_SECRET_KEY", "DOCUMENT_ENCRYPTION_KEY"):
+        value = cfg.get(key) or ""
+        if len(value) < 32 or value.startswith("dev-") or value.startswith("change-this"):
+            problems.append(f"{key} must be a random value of at least 32 characters")
+    if cfg["SQLALCHEMY_DATABASE_URI"].startswith("sqlite"):
+        problems.append("DATABASE_URL must point to PostgreSQL (NeonDB)")
+    if "*" in cfg["CORS_ORIGINS"]:
+        problems.append("CORS_ORIGINS must list your real website address, not *")
+    if problems:
+        raise RuntimeError("Unsafe production configuration: " + "; ".join(problems))

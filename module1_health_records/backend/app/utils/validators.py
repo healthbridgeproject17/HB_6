@@ -16,8 +16,8 @@ def password_problem(password):
         return "Password must be at least 8 characters."
     if not re.search(r"[A-Za-z]", password) or not re.search(r"\d", password):
         return "Password must contain at least one letter and one number."
-    if len(password) > 128:
-        return "Password is too long."
+    if len(password.encode("utf-8")) > 72:
+        return "Password must be at most 72 characters."
     return None
 
 

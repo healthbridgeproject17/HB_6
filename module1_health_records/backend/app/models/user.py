@@ -20,6 +20,11 @@ class User(db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(20), nullable=False)
     is_active = db.Column(db.Boolean, nullable=False, default=True)
+    # bumping token_version invalidates every login token of this user (logout,
+    # password change, disable); must_change_password forces a new password at
+    # first login for accounts created with a temporary password
+    token_version = db.Column(db.Integer, nullable=False, default=0, server_default="0")
+    must_change_password = db.Column(db.Boolean, nullable=False, default=False, server_default=db.false())
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
 
     __table_args__ = (

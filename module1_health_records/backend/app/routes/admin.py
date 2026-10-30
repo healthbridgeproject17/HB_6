@@ -31,7 +31,7 @@ def create_doctor():
     if User.query.filter_by(email=email).first():
         return jsonify(error="An account with this email already exists."), 409
 
-    user = User(name=name, email=email, role="doctor")
+    user = User(name=name, email=email, role="doctor", must_change_password=True)
     user.set_password(password)
     db.session.add(user)
     db.session.flush()
@@ -69,6 +69,7 @@ def set_active(user_id):
     if user.id == g.current_user.id:
         return jsonify(error="You cannot disable your own account."), 400
     user.is_active = body["is_active"]
+    user.token_version += 1  # also ends any session that is still open
     db.session.commit()
     log_action(g.current_user.id, "user_enabled" if user.is_active else "user_disabled",
                "user", user.id)

@@ -1,0 +1,87 @@
+[
+  {
+    "file": "ananya_cbc_iron_report.pdf",
+    "patient": "ananya.krishnan",
+    "doc_type": "lab_report",
+    "by": "patient",
+    "kind": "digital PDF"
+  },
+  {
+    "file": "rahul_diabetes_panel.pdf",
+    "patient": "rahul.menon",
+    "doc_type": "lab_report",
+    "by": "patient",
+    "kind": "digital PDF"
+  },
+  {
+    "file": "fatima_lipid_thyroid_report.pdf",
+    "patient": "fatima.sheikh",
+    "doc_type": "lab_report",
+    "by": "patient",
+    "kind": "digital PDF"
+  },
+  {
+    "file": "karthik_health_checkup.pdf",
+    "patient": "karthik.subramanian",
+    "doc_type": "lab_report",
+    "by": "patient",
+    "kind": "digital PDF"
+  },
+  {
+    "file": "meena_kidney_panel_critical.pdf",
+    "patient": "meena.rajan",
+    "doc_type": "lab_report",
+    "by": "patient",
+    "kind": "digital PDF"
+  },
+  {
+    "file": "rahul_prescription.pdf",
+    "patient": "rahul.menon",
+    "doc_type": "prescription",
+    "by": "doctor:arjun.nair",
+    "kind": "digital PDF"
+  },
+  {
+    "file": "ananya_cbc_iron_report_scan.jpg",
+    "patient": "ananya.krishnan",
+    "doc_type": "lab_report",
+    "by": "patient",
+    "kind": "scanner image"
+  },
+  {
+    "file": "fatima_lipid_thyroid_report_scan.jpg",
+    "patient": "fatima.sheikh",
+    "doc_type": "lab_report",
+    "by": "patient",
+    "kind": "scanner image"
+  },
+  {
+    "file": "meena_kidney_panel_critical_scan.jpg",
+    "patient": "meena.rajan",
+    "doc_type": "lab_report",
+    "by": "patient",
+    "kind": "scanner image"
+  },
+  {
+    "file": "rahul_prescription_photo.jpg",
+    "patient": "rahul.menon",
+    "doc_type": "prescription",
+    "by": "patient",
+    "kind": "phone photo"
+  },
+  {
+    "file": "fatima_prescription_scan.jpg",
+    "patient": "fatima.sheikh",
+    "doc_type": "prescription",
+    "by": "patient",
+    "kind": "scanner image"
+  },
+  {
+    "file": "meena_prescription_photo.jpg",
+    "patient": "meena.rajan",
+    "doc_type": "prescription",
+    "by": "patient",
+    "kind": "phone photo",
+    "draft_source": true
+  }
+]

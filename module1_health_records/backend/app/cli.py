@@ -67,3 +67,38 @@ def register_cli(app):
         db.session.add(admin)
         db.session.commit()
         click.echo(f"Admin created: {clean}")
+
+
+    @app.cli.command("generate-key")
+    def generate_key():
+        """Print a new random key for DOCUMENT_ENCRYPTION_KEY."""
+        from cryptography.fernet import Fernet
+
+        click.echo(Fernet.generate_key().decode())
+
+
+    @app.cli.command("seed-demo")
+    @click.option("--reset", is_flag=True, help="Wipe and recreate the demo patients' clinical data.")
+    @click.option("--password", default=None, help="Password for all demo accounts (default: DEMO_PASSWORD or Demo@12345).")
+    def seed_demo_command(reset, password):
+        """Load FICTIONAL demo doctors, patients, records, prescriptions and documents."""
+        from .demo import DOMAIN, seed_demo
+        from .utils.validators import password_problem
+
+        password = password or os.getenv("DEMO_PASSWORD") or "Demo@12345"
+        problem = password_problem(password)
+        if problem:
+            raise click.ClickException(problem)
+        demo_dir = os.getenv("DEMO_DOCUMENTS_DIR") or os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "..", "..", "demo_documents"))
+        if not os.path.isfile(os.path.join(demo_dir, "manifest.json")):
+            raise click.ClickException(f"Demo documents not found in {demo_dir}")
+        try:
+            result = seed_demo(password, demo_dir, reset=reset)
+        except RuntimeError as exc:
+            raise click.ClickException(str(exc))
+        if result["skipped"]:
+            click.echo("Demo data already exists. Use --reset to recreate it.")
+            return
+        click.echo("Demo data loaded: " + ", ".join(f"{k}={v}" for k, v in result.items() if k != "skipped"))
+        click.echo(f"Log in with any @{DOMAIN} account and password: {password}")

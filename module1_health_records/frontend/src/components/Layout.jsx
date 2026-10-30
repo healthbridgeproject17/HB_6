@@ -18,6 +18,7 @@ export function Shell() {
               <div className="text-xs text-slate-400">{user?.email}</div>
             </div>
             <Badge tone="teal">{user?.role}</Badge>
+            <Link to="/change-password" className="hidden text-sm text-slate-500 hover:text-teal-700 md:inline">Password</Link>
             <Button variant="secondary" onClick={logout}>Log out</Button>
           </div>
         </div>
@@ -31,10 +32,11 @@ export function Shell() {
 
 // Keeps pages behind login AND the right role. (The backend checks again on
 // every request; this only decides which screens are shown.)
-export function RequireRole({ roles, children }) {
+export function RequireRole({ roles, allowPending, children }) {
   const { user, booting } = useAuth();
   if (booting) return <Loading />;
   if (!user) return <Navigate to="/" replace />;
   if (!roles.includes(user.role)) return <Navigate to={homeFor(user.role)} replace />;
+  if (user.must_change_password && !allowPending) return <Navigate to="/change-password" replace />;
   return children;
 }

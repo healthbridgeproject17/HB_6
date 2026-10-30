@@ -5,6 +5,7 @@ from flask import Blueprint, Response, current_app, g, jsonify, request
 from ..extensions import db
 from ..models import Patient, User
 from ..utils.audit import log_action
+from ..utils.crypto import decrypt_bytes
 from ..utils.decorators import role_required
 from ..utils.photos import PhotoError, delete_photo, process_photo, save_photo
 from ..utils.validators import SEXES, clean_phone, parse_dob
@@ -182,7 +183,7 @@ def get_photo(patient_id):
     # Read the (small, <=512px) photo into memory so no file handle stays open;
     # an open handle blocks replacing/deleting the file on Windows.
     with open(full, "rb") as fh:
-        data = fh.read()
+        data = decrypt_bytes(fh.read())
     response = Response(data, mimetype="image/jpeg")
     response.headers["Cache-Control"] = "private, no-store"
     return response

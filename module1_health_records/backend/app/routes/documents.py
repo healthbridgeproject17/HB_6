@@ -6,6 +6,7 @@ from ..extensions import db
 from ..models import Document
 from ..utils.audit import log_action
 from ..utils.decorators import role_required
+from ..utils.crypto import decrypt_bytes
 from ..utils.documents import (
     DocumentError, delete_document_file, safe_display_name, save_document, validate_document,
 )
@@ -109,7 +110,7 @@ def get_document_file(doc_id):
     if not os.path.isfile(full):
         return jsonify(error="The stored file is missing."), 404
     with open(full, "rb") as fh:  # read fully so no file handle stays open (Windows)
-        data = fh.read()
+        data = decrypt_bytes(fh.read())
     if g.current_user.role != "patient":
         log_action(g.current_user.id, "document_viewed", "document", doc.id)
     response = Response(data, mimetype=doc.mime_type or "application/octet-stream")

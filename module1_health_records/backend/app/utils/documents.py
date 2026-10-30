@@ -6,6 +6,8 @@ import threading
 
 from PIL import Image
 
+from .crypto import encrypt_bytes
+
 ALLOWED_EXTENSIONS = {"pdf", "jpg", "jpeg", "png", "webp"}
 FORMAT_TO_EXT = {"JPEG": "jpg", "PNG": "png", "WEBP": "webp"}
 EXT_TO_MIME = {"pdf": "application/pdf", "jpg": "image/jpeg", "png": "image/png", "webp": "image/webp"}
@@ -78,7 +80,7 @@ def save_document(upload_folder, patient_id, data, ext):
     full = os.path.join(upload_folder, rel)
     os.makedirs(os.path.dirname(full), exist_ok=True)
     with open(full, "wb") as fh:
-        fh.write(data)
+        fh.write(encrypt_bytes(data))
     return rel
 
 
