@@ -9,3 +9,4 @@ uploads/*
 instance/
 .pytest_cache/
 dist/
+module2_medical_ai/.venv/

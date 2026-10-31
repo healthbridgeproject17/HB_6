@@ -5,7 +5,7 @@ Needs: reportlab, pymupdf, pillow, numpy (developer tool, not needed by the app)
 import json
 import os
 
-import fitz  # pymupdf
+import pymupdf
 import numpy as np
 from PIL import Image, ImageFilter
 from reportlab.lib import colors
@@ -170,8 +170,8 @@ def rx_pdf(name, spec):
 
 # ---------------------------------------------------------------- image effects
 def render(pdf_path, dpi):
-    page = fitz.open(pdf_path)[0]
-    pix = page.get_pixmap(matrix=fitz.Matrix(dpi / 72, dpi / 72), alpha=False)
+    page = pymupdf.open(pdf_path)[0]
+    pix = page.get_pixmap(matrix=pymupdf.Matrix(dpi / 72, dpi / 72), alpha=False)
     return Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
 
 
@@ -247,6 +247,18 @@ def main():
     open(os.path.join(EXTRAS, "notes.txt"), "w").write("A text file. Only PDF, JPG, PNG and WEBP are accepted.")
     with open(os.path.join(OUT, "manifest.json"), "w") as fh:
         json.dump(manifest, fh, indent=2)
+    # what each document SHOULD say, used to measure reading accuracy
+    truth = {}
+    for item in manifest:
+        stem = item["file"].rsplit(".", 1)[0].removesuffix("_scan").removesuffix("_photo")
+        if stem in REPORTS:
+            rows = [dict(test=t, value=v, unit=u, reference=r, flag=f) for _, section in REPORTS[stem]["sections"] for t, v, u, r, f in section]
+            truth[item["file"]] = dict(type="lab_report", patient=REPORTS[stem]["patient"][0], rows=rows)
+        elif stem in PRESCRIPTIONS:
+            rows = [dict(medicine=m, strength=s, dose=d, route=r, frequency=f, duration=du) for m, s, d, r, f, du in PRESCRIPTIONS[stem]["rows"]]
+            truth[item["file"]] = dict(type="prescription", patient=PRESCRIPTIONS[stem]["patient"][0], rows=rows)
+    with open(os.path.join(OUT, "ground_truth.json"), "w") as fh:
+        json.dump(truth, fh, indent=2)
     print("created", len(manifest), "documents in", os.path.abspath(OUT))
 
 
