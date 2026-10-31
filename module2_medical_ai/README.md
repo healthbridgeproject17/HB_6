@@ -23,3 +23,11 @@ flag (H/L) against its own range; physically plausible limits per test; unit che
 duplicate tests; unknown names listed (never dropped); medicine names checked against a list (suggestion only,
 never auto-corrected); missing prescription fields shown as "not detected" (never guessed).
 Everything is returned as status "unconfirmed" / "draft": a person must confirm it.
+
+## Phase 2.4: clinical rules and the doctor-visit level
+
+    .\.venv\Scripts\python.exe -m medai FILE --analyze     # now ends with an ASSESSMENT (routine / soon / promptly / urgent)
+
+Fixed rules (module2_medical_ai\medai\rules.py) decide abnormal / critical values and the urgency; no AI model is involved.
+The full table of ranges and thresholds is in docs\CLINICAL_RULES.md (generated from the code) for a doctor to review.
+If an uncertain value could change the urgency, the result is marked "needs review before advice".

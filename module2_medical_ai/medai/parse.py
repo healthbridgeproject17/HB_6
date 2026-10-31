@@ -2,7 +2,7 @@
 import difflib
 import re
 
-from . import lab_parser, rx_parser
+from . import lab_parser, rules, rx_parser
 from .catalog import squash_name
 from .extract import extract_document
 
@@ -92,10 +92,15 @@ def analyze_document(data: bytes, engine: str = "auto", patient: dict = None) ->
     identity = check_identity(on_doc["name_as_printed"], patient["name"], patient.get("sex"), on_doc["sex"]) if patient else None
     if identity and identity["status"] != "match":
         warnings.append(identity["message"])
+    triage = None
+    if doc_type == "lab_report":
+        triage = rules.assess(labs, patient={"sex": (patient or {}).get("sex"), "age": (patient or {}).get("age")}, document={"sex": on_doc["sex"], "age": on_doc["age"]})
+        if triage["needs_review_before_advice"]:
+            warnings.append(triage["review_note"])
     items = labs + rx_items
     return {
         "document_type": doc_type, "patient_on_document": on_doc, "identity": identity,
-        "lab_results": labs, "unrecognized_rows": unrecognized, "prescription_items": rx_items,
+        "lab_results": labs, "unrecognized_rows": unrecognized, "prescription_items": rx_items, "triage": triage,
         "summary": {"items": len(items), "needs_review": sum(1 for i in items if i["needs_review"]), "unrecognized_rows": len(unrecognized)},
         "warnings": warnings, "status": "unconfirmed", "disclaimer": DISCLAIMER,
         "extraction": {k: ex[k] for k in ("kind", "page_count", "mean_confidence", "ocr_engine", "elapsed_seconds", "pages")},

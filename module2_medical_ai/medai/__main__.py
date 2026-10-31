@@ -22,7 +22,9 @@ def show_analysis(args):
     for x in r["lab_results"]:
         flag = x["printed_flag"] or "-"
         mark = "  REVIEW" if x["needs_review"] else ""
-        print(f"  {x['test']:26} {x['value']:>8g} {x['unit'] or '?':16} range {x['reference']['text'] if x['reference'] else '?':16} flag {flag:3} conf {x['confidence']:.0%}{mark}")
+        i = x.get("interpretation") or {}
+        meaning = f"{(i.get('status') or '?').upper():12} {(i.get('severity') or ''):9}"
+        print(f"  {x['test']:24} {x['value']:>7g} {x['unit'] or '?':14} range {x['reference']['text'] if x['reference'] else '?':14} {meaning} conf {x['confidence']:.0%}{mark}")
         for issue in x["issues"]:
             print("      !", issue)
     for x in r["prescription_items"]:
@@ -30,6 +32,12 @@ def show_analysis(args):
         print(f"  {f('medicine')} | strength {f('strength')} | dose {f('dose')} | route {f('route')} | frequency {f('frequency')} | duration {f('duration')}" + ("  REVIEW" if x["needs_review"] else ""))
         for issue in x["issues"]:
             print("      !", issue)
+    t = r.get("triage")
+    if t:
+        print(f"\n  ASSESSMENT: {t['label'].upper()}" + (f" ({t['timeframe']})" if t["timeframe"] else "") + ("  [PROVISIONAL: values need checking]" if t["provisional"] else ""))
+        for reason in t["reasons"]:
+            print("   -", reason["text"])
+        print("   ", t["advice"])
     for u in r["unrecognized_rows"]:
         print("  UNRECOGNISED ROW:", u["name_as_printed"], u["value"])
     for w in r["warnings"]:
