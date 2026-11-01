@@ -31,3 +31,10 @@ Everything is returned as status "unconfirmed" / "draft": a person must confirm 
 Fixed rules (module2_medical_ai\medai\rules.py) decide abnormal / critical values and the urgency; no AI model is involved.
 The full table of ranges and thresholds is in docs\CLINICAL_RULES.md (generated from the code) for a doctor to review.
 If an uncertain value could change the urgency, the result is marked "needs review before advice".
+
+## Phase 2.5: the plain-language report
+
+    .\.venv\Scripts\python.exe -m medai FILE --report     # what a patient would read: summary, good news, concerns, self-care, when to see a doctor
+
+The wording lives in medai\knowledge.py (reviewed by a doctor via docs\PATIENT_ADVICE_TEXTS.md). Tests forbid any dose or
+"start/stop a medicine" wording. Every concern links back to the exact place on the document it was read from.

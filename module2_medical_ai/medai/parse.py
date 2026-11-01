@@ -2,7 +2,7 @@
 import difflib
 import re
 
-from . import lab_parser, rules, rx_parser
+from . import lab_parser, rules, rx_parser, summary
 from .catalog import squash_name
 from .extract import extract_document
 
@@ -98,10 +98,12 @@ def analyze_document(data: bytes, engine: str = "auto", patient: dict = None) ->
         if triage["needs_review_before_advice"]:
             warnings.append(triage["review_note"])
     items = labs + rx_items
-    return {
+    result = {
         "document_type": doc_type, "patient_on_document": on_doc, "identity": identity,
         "lab_results": labs, "unrecognized_rows": unrecognized, "prescription_items": rx_items, "triage": triage,
         "summary": {"items": len(items), "needs_review": sum(1 for i in items if i["needs_review"]), "unrecognized_rows": len(unrecognized)},
         "warnings": warnings, "status": "unconfirmed", "disclaimer": DISCLAIMER,
         "extraction": {k: ex[k] for k in ("kind", "page_count", "mean_confidence", "ocr_engine", "elapsed_seconds", "pages")},
     }
+    result["report"] = summary.build_report(result)
+    return result

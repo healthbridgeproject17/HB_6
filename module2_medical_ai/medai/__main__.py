@@ -6,6 +6,16 @@ from .extract import ExtractionError, extract_document
 from .parse import analyze_document
 
 
+def show_report(args):
+    from .summary import to_text
+    try:
+        r = analyze_document(open(args.file, "rb").read(), engine=args.engine)
+    except ExtractionError as exc:
+        print("Cannot read file:", exc)
+        sys.exit(1)
+    print(to_text(r["report"]))
+
+
 def show_analysis(args):
     try:
         r = analyze_document(open(args.file, "rb").read(), engine=args.engine)
@@ -50,8 +60,11 @@ def main():
     ap.add_argument("file")
     ap.add_argument("--engine", default="auto", choices=["auto", "rapidocr", "tesseract"])
     ap.add_argument("--json", action="store_true", help="print the full result as JSON")
+    ap.add_argument("--report", action="store_true", help="print the plain-language report a patient would read")
     ap.add_argument("--analyze", action="store_true", help="structure the result (lab values / prescription fields) and run the checks")
     args = ap.parse_args()
+    if args.report:
+        return show_report(args)
     if args.analyze:
         return show_analysis(args)
     try:
