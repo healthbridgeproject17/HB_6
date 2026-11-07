@@ -102,3 +102,21 @@ def register_cli(app):
             return
         click.echo("Demo data loaded: " + ", ".join(f"{k}={v}" for k, v in result.items() if k != "skipped"))
         click.echo(f"Log in with any @{DOMAIN} account and password: {password}")
+
+
+    @app.cli.command("seed-security")
+    def seed_security_command():
+        """Add three FICTIONAL simulated machines to the security monitor. Safe to run again."""
+        from .models import MonitoredMachine
+        from .utils.audit import log_action
+
+        added = 0
+        for name in ("Reception-PC", "Pharmacy-PC", "Records-Server"):
+            if MonitoredMachine.query.filter(db.func.lower(MonitoredMachine.name) == name.lower()).first():
+                continue
+            db.session.add(MonitoredMachine(name=name, kind="simulated"))
+            added += 1
+        db.session.commit()
+        if added:
+            log_action(None, "security_machines_seeded", "machine", None, detail=f"{added} simulated machine(s) added")
+        click.echo(f"Security demo ready: {added} simulated machine(s) added.")

@@ -19,3 +19,8 @@ def fresh_upload_folder(tmp_path, monkeypatch):
 _medai = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "module2_medical_ai"))
 if os.path.isdir(_medai) and _medai not in sys.path:
     sys.path.insert(0, _medai)
+
+# make the Module 3 detection package (rwdetect) importable for the security monitor tests
+_rwdetect = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "module3_ransomware"))
+if os.path.isdir(_rwdetect) and _rwdetect not in sys.path:
+    sys.path.insert(0, _rwdetect)
