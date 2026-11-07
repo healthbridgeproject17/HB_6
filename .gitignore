@@ -10,4 +10,3 @@ instance/
 .pytest_cache/
 dist/
 module2_medical_ai/.venv/
-module1_health_records/backend/uploads/

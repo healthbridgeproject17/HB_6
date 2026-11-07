@@ -1,4 +1,5 @@
 import os
+import re
 from datetime import date, datetime, timedelta, timezone
 
 from flask import Blueprint, Response, current_app, g, jsonify, request
@@ -259,6 +260,22 @@ def review_analysis(job_id):
     return jsonify(analysis_job=job_detail(job, g.current_user))
 
 
+def rx_text(item, field):
+    """The tidy text to save for a prescription field (e.g. '500 mg', not '500mg')."""
+    data = item[field]
+    if data["status"] == "missing":
+        return None
+    value = data.get("value")
+    if field in ("strength", "dose", "route", "duration") and isinstance(value, dict) and value.get("text"):
+        return value["text"][:80]
+    text = data.get("printed") or ""
+    if field == "frequency":
+        text = re.sub(r"(?<=[A-Za-z])\.(?=[A-Za-z])", ", ", text)
+        text = re.sub(r"\s*,\s*", ", ", text).strip()
+        text = text[:1].upper() + text[1:]
+    return text[:80] or None
+
+
 def confirm_problem(a, body):
     items = a["lab_results"] + a["prescription_items"]
     if a["document_type"] == "unknown" or not items:
@@ -289,9 +306,9 @@ def save_confirmed(job, a, user):
                                  status=interp.get("status"), severity=interp.get("severity"), collected_on=collected, confirmed_by=user.id, confirmed_by_role=user.role))
     doctor = user.doctor if user.role == "doctor" else None
     for it in a["prescription_items"]:
-        text = lambda f: ((it[f].get("printed") or "")[:80] or None) if it[f]["status"] != "missing" else None  # noqa: E731
         rx = Prescription(patient_id=job.patient_id, doctor_id=doctor.id if doctor else None, medicine=(it["medicine"]["value"] or "")[:200],
-                          strength=text("strength"), dose=text("dose"), route=text("route"), frequency=text("frequency"), duration=text("duration"),
+                          strength=rx_text(it, "strength"), dose=rx_text(it, "dose"), route=rx_text(it, "route"),
+                          frequency=rx_text(it, "frequency"), duration=rx_text(it, "duration"),
                           start_date=date.today(), status="confirmed" if doctor else "draft", source_document_id=job.document_id)
         if doctor:
             rx.confirmed_by_doctor_id, rx.confirmed_at = doctor.id, now()

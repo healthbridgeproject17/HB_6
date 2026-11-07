@@ -171,3 +171,20 @@ def test_unreadable_unit_is_never_shown_as_garbage():
 def test_related_results_say_when_advice_is_shared():
     text = to_text(analyze("meena_kidney_panel_critical.pdf")["report"])
     assert "same as for the related results above" in text
+
+
+def test_spacing_slips_in_a_known_medicine_name_are_fixed_for_display_only():
+    from medai import rx_parser
+    from tests.test_parse import rx_page
+    page = rx_page([("Sodiumbicarbonate", "500mg", "1tablet", "Oral", "Once daily.morning", "14days")])
+    it = rx_parser.parse_table(page, False)[0]
+    assert it["medicine"]["value"] == "Sodium bicarbonate" and it["medicine"]["printed"] == "Sodiumbicarbonate" and not it["needs_review"]
+    from medai.summary import _sentence, _prescription_report
+    assert _sentence(it) == "Sodium bicarbonate 500 mg: take 1 tablet by mouth, once daily, morning, for 14 days."
+    rep = _prescription_report({"prescription_items": [it], "identity": None})
+    assert "acid" in rep["items"][0]["purpose"]
+
+
+def test_a_near_miss_is_still_only_a_suggestion():
+    from medai import rx_parser
+    assert rx_parser.check_medicine("Metformn")["name"] == "Metformn"

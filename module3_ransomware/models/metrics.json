@@ -1,0 +1,861 @@
+{
+  "version": "0.1",
+  "seed": 42,
+  "min_detection_rule": 0.9,
+  "alert_rule": {
+    "k": 2,
+    "m": 3,
+    "cooldown": 12
+  },
+  "chosen": "gradient_boosting",
+  "data": {
+    "windows": 106781,
+    "attack_share": 0.11259493730157986,
+    "benign_runs": 500,
+    "attack_runs_per_family": 50,
+    "window_seconds": 5,
+    "families": [
+      "fast_encryptor",
+      "slow_drip",
+      "network_spreader",
+      "double_extortion"
+    ]
+  },
+  "models": {
+    "logistic_regression": {
+      "threshold": 0.9433177309221538,
+      "max_fpr": 0.001,
+      "validation_pr_auc": 0.9179365579999613,
+      "test_windows": {
+        "roc_auc": 0.9740775024716608,
+        "pr_auc": 0.9385219020569587,
+        "precision": 0.9912891986062717,
+        "recall": 0.7279317697228145,
+        "f1": 0.8394393902139169,
+        "false_positive_rate": 0.0008028689182679441,
+        "tp": 1707,
+        "fp": 15,
+        "fn": 638,
+        "tn": 18668
+      },
+      "test_runs": {
+        "attack_runs": 40,
+        "attacks_caught": 37,
+        "detection_rate": 0.925,
+        "median_delay_windows": 5.0,
+        "p90_delay_windows": 35.199999999999996,
+        "median_delay_seconds": 25.0,
+        "detection_ci95": [
+          0.8013546984090248,
+          0.9741644432281419
+        ],
+        "false_alarms": 0,
+        "benign_hours": 25.09722222222222,
+        "false_alarms_per_machine_hour": 0.0,
+        "false_alarms_upper95_per_machine_hour": 0.14698357537144624,
+        "by_family": {
+          "fast_encryptor": {
+            "runs": 10,
+            "detection_rate": 0.8,
+            "median_delay_windows": 2.0
+          },
+          "slow_drip": {
+            "runs": 10,
+            "detection_rate": 0.9,
+            "median_delay_windows": 34.0
+          },
+          "network_spreader": {
+            "runs": 10,
+            "detection_rate": 1.0,
+            "median_delay_windows": 5.0
+          },
+          "double_extortion": {
+            "runs": 10,
+            "detection_rate": 1.0,
+            "median_delay_windows": 5.0
+          }
+        }
+      },
+      "operating_points": [
+        {
+          "max_fpr": 0.005,
+          "threshold": 0.8479118084466112,
+          "val_detection": 0.975,
+          "val_false_alarms_per_hour": 0.1893441329616578,
+          "test_detection": 0.975,
+          "test_false_alarms_per_hour": 0.1593801881571666,
+          "test_median_delay_windows": 4.0,
+          "test_window_recall": 0.8213219616204691,
+          "test_window_pr_auc": 0.9385219020569587
+        },
+        {
+          "max_fpr": 0.002,
+          "threshold": 0.9033771718903527,
+          "val_detection": 0.95,
+          "val_false_alarms_per_hour": 0.03786882659233156,
+          "test_detection": 0.975,
+          "test_false_alarms_per_hour": 0.0,
+          "test_median_delay_windows": 4.0,
+          "test_window_recall": 0.7803837953091685,
+          "test_window_pr_auc": 0.9385219020569587
+        },
+        {
+          "max_fpr": 0.001,
+          "threshold": 0.9433177309221538,
+          "val_detection": 0.9,
+          "val_false_alarms_per_hour": 0.0,
+          "test_detection": 0.925,
+          "test_false_alarms_per_hour": 0.0,
+          "test_median_delay_windows": 5.0,
+          "test_window_recall": 0.7279317697228145,
+          "test_window_pr_auc": 0.9385219020569587
+        },
+        {
+          "max_fpr": 0.0005,
+          "threshold": 0.9585405382328909,
+          "val_detection": 0.875,
+          "val_false_alarms_per_hour": 0.0,
+          "test_detection": 0.875,
+          "test_false_alarms_per_hour": 0.0,
+          "test_median_delay_windows": 5.0,
+          "test_window_recall": 0.7040511727078891,
+          "test_window_pr_auc": 0.9385219020569587
+        },
+        {
+          "max_fpr": 0.0002,
+          "threshold": 0.9675449273056741,
+          "val_detection": 0.875,
+          "val_false_alarms_per_hour": 0.0,
+          "test_detection": 0.85,
+          "test_false_alarms_per_hour": 0.0,
+          "test_median_delay_windows": 5.0,
+          "test_window_recall": 0.67590618336887,
+          "test_window_pr_auc": 0.9385219020569587
+        },
+        {
+          "max_fpr": 0.0001,
+          "threshold": 0.9758760445026439,
+          "val_detection": 0.825,
+          "val_false_alarms_per_hour": 0.0,
+          "test_detection": 0.825,
+          "test_false_alarms_per_hour": 0.0,
+          "test_median_delay_windows": 5.0,
+          "test_window_recall": 0.655863539445629,
+          "test_window_pr_auc": 0.9385219020569587
+        }
+      ]
+    },
+    "random_forest": {
+      "threshold": 0.7142934265377019,
+      "max_fpr": 0.0005,
+      "validation_pr_auc": 0.9830391761107858,
+      "test_windows": {
+        "roc_auc": 0.994762441529516,
+        "pr_auc": 0.9793697418061804,
+        "precision": 0.9956268221574344,
+        "recall": 0.873773987206823,
+        "f1": 0.9307290483761071,
+        "false_positive_rate": 0.0004817213509607665,
+        "tp": 2049,
+        "fp": 9,
+        "fn": 296,
+        "tn": 18674
+      },
+      "test_runs": {
+        "attack_runs": 40,
+        "attacks_caught": 40,
+        "detection_rate": 1.0,
+        "median_delay_windows": 4.0,
+        "p90_delay_windows": 17.200000000000003,
+        "median_delay_seconds": 20.0,
+        "detection_ci95": [
+          0.9123754607496077,
+          1.0
+        ],
+        "false_alarms": 1,
+        "benign_hours": 25.09722222222222,
+        "false_alarms_per_machine_hour": 0.03984504703929165,
+        "false_alarms_upper95_per_machine_hour": 0.2220023929981188,
+        "by_family": {
+          "fast_encryptor": {
+            "runs": 10,
+            "detection_rate": 1.0,
+            "median_delay_windows": 3.0
+          },
+          "slow_drip": {
+            "runs": 10,
+            "detection_rate": 1.0,
+            "median_delay_windows": 13.0
+          },
+          "network_spreader": {
+            "runs": 10,
+            "detection_rate": 1.0,
+            "median_delay_windows": 1.0
+          },
+          "double_extortion": {
+            "runs": 10,
+            "detection_rate": 1.0,
+            "median_delay_windows": 5.5
+          }
+        }
+      },
+      "operating_points": [
+        {
+          "max_fpr": 0.005,
+          "threshold": 0.4421664982043223,
+          "val_detection": 1.0,
+          "val_false_alarms_per_hour": 0.26508178614632094,
+          "test_detection": 1.0,
+          "test_false_alarms_per_hour": 0.4781405644714997,
+          "test_median_delay_windows": 2.0,
+          "test_window_recall": 0.9373134328358209,
+          "test_window_pr_auc": 0.9793697418061804
+        },
+        {
+          "max_fpr": 0.002,
+          "threshold": 0.5736382185054644,
+          "val_detection": 1.0,
+          "val_false_alarms_per_hour": 0.03786882659233156,
+          "test_detection": 1.0,
+          "test_false_alarms_per_hour": 0.23907028223574986,
+          "test_median_delay_windows": 3.5,
+          "test_window_recall": 0.9057569296375266,
+          "test_window_pr_auc": 0.9793697418061804
+        },
+        {
+          "max_fpr": 0.001,
+          "threshold": 0.640257528269046,
+          "val_detection": 1.0,
+          "val_false_alarms_per_hour": 0.03786882659233156,
+          "test_detection": 1.0,
+          "test_false_alarms_per_hour": 0.03984504703929165,
+          "test_median_delay_windows": 4.0,
+          "test_window_recall": 0.8925373134328358,
+          "test_window_pr_auc": 0.9793697418061804
+        },
+        {
+          "max_fpr": 0.0005,
+          "threshold": 0.7142934265377019,
+          "val_detection": 1.0,
+          "val_false_alarms_per_hour": 0.0,
+          "test_detection": 1.0,
+          "test_false_alarms_per_hour": 0.03984504703929165,
+          "test_median_delay_windows": 4.0,
+          "test_window_recall": 0.873773987206823,
+          "test_window_pr_auc": 0.9793697418061804
+        },
+        {
+          "max_fpr": 0.0002,
+          "threshold": 0.7968366425093774,
+          "val_detection": 1.0,
+          "val_false_alarms_per_hour": 0.0,
+          "test_detection": 1.0,
+          "test_false_alarms_per_hour": 0.0,
+          "test_median_delay_windows": 4.0,
+          "test_window_recall": 0.8486140724946695,
+          "test_window_pr_auc": 0.9793697418061804
+        },
+        {
+          "max_fpr": 0.0001,
+          "threshold": 0.8575804342080932,
+          "val_detection": 0.975,
+          "val_false_alarms_per_hour": 0.0,
+          "test_detection": 0.975,
+          "test_false_alarms_per_hour": 0.0,
+          "test_median_delay_windows": 4.0,
+          "test_window_recall": 0.8149253731343283,
+          "test_window_pr_auc": 0.9793697418061804
+        }
+      ]
+    },
+    "gradient_boosting": {
+      "threshold": 0.7941804440713099,
+      "max_fpr": 0.001,
+      "validation_pr_auc": 0.9866910303888207,
+      "test_windows": {
+        "roc_auc": 0.9970900195804151,
+        "pr_auc": 0.9879840233457913,
+        "precision": 0.9905447996398019,
+        "recall": 0.9381663113006397,
+        "f1": 0.9636443276390714,
+        "false_positive_rate": 0.0011240164855751218,
+        "tp": 2200,
+        "fp": 21,
+        "fn": 145,
+        "tn": 18662
+      },
+      "test_runs": {
+        "attack_runs": 40,
+        "attacks_caught": 40,
+        "detection_rate": 1.0,
+        "median_delay_windows": 1.0,
+        "p90_delay_windows": 5.100000000000001,
+        "median_delay_seconds": 5.0,
+        "detection_ci95": [
+          0.9123754607496077,
+          1.0
+        ],
+        "false_alarms": 2,
+        "benign_hours": 25.09722222222222,
+        "false_alarms_per_machine_hour": 0.0796900940785833,
+        "false_alarms_upper95_per_machine_hour": 0.28786801996465144,
+        "by_family": {
+          "fast_encryptor": {
+            "runs": 10,
+            "detection_rate": 1.0,
+            "median_delay_windows": 2.0
+          },
+          "slow_drip": {
+            "runs": 10,
+            "detection_rate": 1.0,
+            "median_delay_windows": 2.5
+          },
+          "network_spreader": {
+            "runs": 10,
+            "detection_rate": 1.0,
+            "median_delay_windows": 1.0
+          },
+          "double_extortion": {
+            "runs": 10,
+            "detection_rate": 1.0,
+            "median_delay_windows": 1.0
+          }
+        }
+      },
+      "operating_points": [
+        {
+          "max_fpr": 0.005,
+          "threshold": 0.5275515724693998,
+          "val_detection": 1.0,
+          "val_false_alarms_per_hour": 0.22721295955398937,
+          "test_detection": 1.0,
+          "test_false_alarms_per_hour": 0.23907028223574986,
+          "test_median_delay_windows": 1.0,
+          "test_window_recall": 0.9616204690831557,
+          "test_window_pr_auc": 0.9879840233457913
+        },
+        {
+          "max_fpr": 0.002,
+          "threshold": 0.7060159379826842,
+          "val_detection": 1.0,
+          "val_false_alarms_per_hour": 0.03786882659233156,
+          "test_detection": 1.0,
+          "test_false_alarms_per_hour": 0.1593801881571666,
+          "test_median_delay_windows": 1.0,
+          "test_window_recall": 0.947547974413646,
+          "test_window_pr_auc": 0.9879840233457913
+        },
+        {
+          "max_fpr": 0.001,
+          "threshold": 0.7941804440713099,
+          "val_detection": 1.0,
+          "val_false_alarms_per_hour": 0.0,
+          "test_detection": 1.0,
+          "test_false_alarms_per_hour": 0.0796900940785833,
+          "test_median_delay_windows": 1.0,
+          "test_window_recall": 0.9381663113006397,
+          "test_window_pr_auc": 0.9879840233457913
+        },
+        {
+          "max_fpr": 0.0005,
+          "threshold": 0.8550540531687844,
+          "val_detection": 1.0,
+          "val_false_alarms_per_hour": 0.0,
+          "test_detection": 1.0,
+          "test_false_alarms_per_hour": 0.0,
+          "test_median_delay_windows": 2.0,
+          "test_window_recall": 0.9283582089552239,
+          "test_window_pr_auc": 0.9879840233457913
+        },
+        {
+          "max_fpr": 0.0002,
+          "threshold": 0.9062754537418217,
+          "val_detection": 1.0,
+          "val_false_alarms_per_hour": 0.0,
+          "test_detection": 1.0,
+          "test_false_alarms_per_hour": 0.0,
+          "test_median_delay_windows": 2.0,
+          "test_window_recall": 0.91727078891258,
+          "test_window_pr_auc": 0.9879840233457913
+        },
+        {
+          "max_fpr": 0.0001,
+          "threshold": 0.9290742966979272,
+          "val_detection": 1.0,
+          "val_false_alarms_per_hour": 0.0,
+          "test_detection": 1.0,
+          "test_false_alarms_per_hour": 0.0,
+          "test_median_delay_windows": 2.0,
+          "test_window_recall": 0.9108742004264392,
+          "test_window_pr_auc": 0.9879840233457913
+        }
+      ]
+    },
+    "isolation_forest": {
+      "threshold": 0.07555974991491167,
+      "max_fpr": 0.005,
+      "validation_pr_auc": 0.8017536672471491,
+      "test_windows": {
+        "roc_auc": 0.9316227070731327,
+        "pr_auc": 0.7758917444043495,
+        "precision": 0.8851000741289844,
+        "recall": 0.5091684434968017,
+        "f1": 0.646453708716838,
+        "false_positive_rate": 0.008296312155435423,
+        "tp": 1194,
+        "fp": 155,
+        "fn": 1151,
+        "tn": 18528
+      },
+      "test_runs": {
+        "attack_runs": 40,
+        "attacks_caught": 30,
+        "detection_rate": 0.75,
+        "median_delay_windows": 5.5,
+        "p90_delay_windows": 10.100000000000001,
+        "median_delay_seconds": 27.5,
+        "detection_ci95": [
+          0.598057409330299,
+          0.8581303210445048
+        ],
+        "false_alarms": 17,
+        "benign_hours": 25.09722222222222,
+        "false_alarms_per_machine_hour": 0.677365799667958,
+        "false_alarms_upper95_per_machine_hour": 1.0845282627256647,
+        "by_family": {
+          "fast_encryptor": {
+            "runs": 10,
+            "detection_rate": 0.9,
+            "median_delay_windows": 5.0
+          },
+          "slow_drip": {
+            "runs": 10,
+            "detection_rate": 0.1,
+            "median_delay_windows": 32.0
+          },
+          "network_spreader": {
+            "runs": 10,
+            "detection_rate": 1.0,
+            "median_delay_windows": 4.5
+          },
+          "double_extortion": {
+            "runs": 10,
+            "detection_rate": 1.0,
+            "median_delay_windows": 7.0
+          }
+        }
+      },
+      "operating_points": [
+        {
+          "max_fpr": 0.005,
+          "threshold": 0.07555974991491167,
+          "val_detection": 0.775,
+          "val_false_alarms_per_hour": 0.22721295955398937,
+          "test_detection": 0.75,
+          "test_false_alarms_per_hour": 0.677365799667958,
+          "test_median_delay_windows": 5.5,
+          "test_window_recall": 0.5091684434968017,
+          "test_window_pr_auc": 0.7758917444043495
+        },
+        {
+          "max_fpr": 0.002,
+          "threshold": 0.11925406416048291,
+          "val_detection": 0.725,
+          "val_false_alarms_per_hour": 0.07573765318466312,
+          "test_detection": 0.575,
+          "test_false_alarms_per_hour": 0.11953514111787493,
+          "test_median_delay_windows": 6.0,
+          "test_window_recall": 0.35735607675906184,
+          "test_window_pr_auc": 0.7758917444043495
+        },
+        {
+          "max_fpr": 0.001,
+          "threshold": 0.14724329921967919,
+          "val_detection": 0.65,
+          "val_false_alarms_per_hour": 0.0,
+          "test_detection": 0.5,
+          "test_false_alarms_per_hour": 0.0,
+          "test_median_delay_windows": 10.5,
+          "test_window_recall": 0.2605543710021322,
+          "test_window_pr_auc": 0.7758917444043495
+        },
+        {
+          "max_fpr": 0.0005,
+          "threshold": 0.1629938179420525,
+          "val_detection": 0.525,
+          "val_false_alarms_per_hour": 0.0,
+          "test_detection": 0.45,
+          "test_false_alarms_per_hour": 0.0,
+          "test_median_delay_windows": 10.0,
+          "test_window_recall": 0.2046908315565032,
+          "test_window_pr_auc": 0.7758917444043495
+        },
+        {
+          "max_fpr": 0.0002,
+          "threshold": 0.186827937691904,
+          "val_detection": 0.325,
+          "val_false_alarms_per_hour": 0.0,
+          "test_detection": 0.35,
+          "test_false_alarms_per_hour": 0.0,
+          "test_median_delay_windows": 13.5,
+          "test_window_recall": 0.12452025586353944,
+          "test_window_pr_auc": 0.7758917444043495
+        },
+        {
+          "max_fpr": 0.0001,
+          "threshold": 0.20378933906670307,
+          "val_detection": 0.125,
+          "val_false_alarms_per_hour": 0.0,
+          "test_detection": 0.175,
+          "test_false_alarms_per_hour": 0.0,
+          "test_median_delay_windows": 5.0,
+          "test_window_recall": 0.07889125799573561,
+          "test_window_pr_auc": 0.7758917444043495
+        }
+      ]
+    },
+    "rule_baseline": {
+      "threshold": 0.38344624782821485,
+      "max_fpr": 0.005,
+      "validation_pr_auc": 0.806869099542466,
+      "test_windows": {
+        "roc_auc": 0.8954418044430434,
+        "pr_auc": 0.8039950522965811,
+        "precision": 0.9497389033942559,
+        "recall": 0.6204690831556503,
+        "f1": 0.7505803456280631,
+        "false_positive_rate": 0.004121393780442113,
+        "tp": 1455,
+        "fp": 77,
+        "fn": 890,
+        "tn": 18606
+      },
+      "test_runs": {
+        "attack_runs": 40,
+        "attacks_caught": 34,
+        "detection_rate": 0.85,
+        "median_delay_windows": 9.0,
+        "p90_delay_windows": 39.099999999999994,
+        "median_delay_seconds": 45.0,
+        "detection_ci95": [
+          0.7092737396097997,
+          0.9293890829149256
+        ],
+        "false_alarms": 1,
+        "benign_hours": 25.09722222222222,
+        "false_alarms_per_machine_hour": 0.03984504703929165,
+        "false_alarms_upper95_per_machine_hour": 0.2220023929981188,
+        "by_family": {
+          "fast_encryptor": {
+            "runs": 10,
+            "detection_rate": 0.9,
+            "median_delay_windows": 4.0
+          },
+          "slow_drip": {
+            "runs": 10,
+            "detection_rate": 0.5,
+            "median_delay_windows": 20.0
+          },
+          "network_spreader": {
+            "runs": 10,
+            "detection_rate": 1.0,
+            "median_delay_windows": 7.0
+          },
+          "double_extortion": {
+            "runs": 10,
+            "detection_rate": 1.0,
+            "median_delay_windows": 30.0
+          }
+        }
+      },
+      "operating_points": [
+        {
+          "max_fpr": 0.005,
+          "threshold": 0.38344624782821485,
+          "val_detection": 0.875,
+          "val_false_alarms_per_hour": 0.07573765318466312,
+          "test_detection": 0.85,
+          "test_false_alarms_per_hour": 0.03984504703929165,
+          "test_median_delay_windows": 9.0,
+          "test_window_recall": 0.6204690831556503,
+          "test_window_pr_auc": 0.8039950522965811
+        },
+        {
+          "max_fpr": 0.002,
+          "threshold": 0.428597102077788,
+          "val_detection": 0.85,
+          "val_false_alarms_per_hour": 0.03786882659233156,
+          "test_detection": 0.8,
+          "test_false_alarms_per_hour": 0.0,
+          "test_median_delay_windows": 9.0,
+          "test_window_recall": 0.5863539445628998,
+          "test_window_pr_auc": 0.8039950522965811
+        },
+        {
+          "max_fpr": 0.001,
+          "threshold": 0.46278028205427385,
+          "val_detection": 0.85,
+          "val_false_alarms_per_hour": 0.0,
+          "test_detection": 0.8,
+          "test_false_alarms_per_hour": 0.0,
+          "test_median_delay_windows": 9.0,
+          "test_window_recall": 0.562046908315565,
+          "test_window_pr_auc": 0.8039950522965811
+        },
+        {
+          "max_fpr": 0.0005,
+          "threshold": 0.5013478322774952,
+          "val_detection": 0.85,
+          "val_false_alarms_per_hour": 0.0,
+          "test_detection": 0.775,
+          "test_false_alarms_per_hour": 0.0,
+          "test_median_delay_windows": 10.0,
+          "test_window_recall": 0.5330490405117271,
+          "test_window_pr_auc": 0.8039950522965811
+        },
+        {
+          "max_fpr": 0.0002,
+          "threshold": 0.5475309391751562,
+          "val_detection": 0.75,
+          "val_false_alarms_per_hour": 0.0,
+          "test_detection": 0.775,
+          "test_false_alarms_per_hour": 0.0,
+          "test_median_delay_windows": 10.0,
+          "test_window_recall": 0.4908315565031983,
+          "test_window_pr_auc": 0.8039950522965811
+        },
+        {
+          "max_fpr": 0.0001,
+          "threshold": 0.6332689884134809,
+          "val_detection": 0.65,
+          "val_false_alarms_per_hour": 0.0,
+          "test_detection": 0.675,
+          "test_false_alarms_per_hour": 0.0,
+          "test_median_delay_windows": 16.0,
+          "test_window_recall": 0.38251599147121534,
+          "test_window_pr_auc": 0.8039950522965811
+        }
+      ]
+    }
+  },
+  "leave_one_family_out": {
+    "logistic_regression": {
+      "fast_encryptor": {
+        "window_recall": 0.8237994350282486,
+        "detection_rate": 0.92,
+        "median_delay_windows": 3.0
+      },
+      "slow_drip": {
+        "window_recall": 0.1248900615655233,
+        "detection_rate": 0.54,
+        "median_delay_windows": 30.0
+      },
+      "network_spreader": {
+        "window_recall": 0.6138888888888889,
+        "detection_rate": 0.98,
+        "median_delay_windows": 7.0
+      },
+      "double_extortion": {
+        "window_recall": 0.6365030674846626,
+        "detection_rate": 1.0,
+        "median_delay_windows": 17.5
+      }
+    },
+    "random_forest": {
+      "fast_encryptor": {
+        "window_recall": 0.8237994350282486,
+        "detection_rate": 0.88,
+        "median_delay_windows": 3.0
+      },
+      "slow_drip": {
+        "window_recall": 0.22544708296687188,
+        "detection_rate": 0.7,
+        "median_delay_windows": 23.0
+      },
+      "network_spreader": {
+        "window_recall": 0.8543650793650793,
+        "detection_rate": 1.0,
+        "median_delay_windows": 6.0
+      },
+      "double_extortion": {
+        "window_recall": 0.599079754601227,
+        "detection_rate": 1.0,
+        "median_delay_windows": 23.5
+      }
+    },
+    "gradient_boosting": {
+      "fast_encryptor": {
+        "window_recall": 0.8418079096045198,
+        "detection_rate": 0.9,
+        "median_delay_windows": 3.0
+      },
+      "slow_drip": {
+        "window_recall": 0.29170331281149225,
+        "detection_rate": 0.78,
+        "median_delay_windows": 17.0
+      },
+      "network_spreader": {
+        "window_recall": 0.8638888888888889,
+        "detection_rate": 1.0,
+        "median_delay_windows": 6.0
+      },
+      "double_extortion": {
+        "window_recall": 0.6110429447852761,
+        "detection_rate": 1.0,
+        "median_delay_windows": 21.0
+      }
+    }
+  },
+  "feature_importance": [
+    {
+      "feature": "files_renamed_per_s",
+      "importance": 0.23556068933591287
+    },
+    {
+      "feature": "ext_change_ratio",
+      "importance": 0.08728385632827174
+    },
+    {
+      "feature": "rare_dest_count",
+      "importance": 0.04236326210795349
+    },
+    {
+      "feature": "high_entropy_write_ratio",
+      "importance": 0.039079505608553555
+    },
+    {
+      "feature": "new_process_count",
+      "importance": 0.035683145914669034
+    },
+    {
+      "feature": "distinct_dirs_touched",
+      "importance": 0.013998899910102391
+    },
+    {
+      "feature": "smb_distinct_hosts",
+      "importance": 0.013520646148400872
+    },
+    {
+      "feature": "suspicious_cmd_count",
+      "importance": 0.008417156053831273
+    },
+    {
+      "feature": "write_entropy_mean",
+      "importance": 0.007551716498602645
+    },
+    {
+      "feature": "out_in_ratio",
+      "importance": 0.007323661101935164
+    },
+    {
+      "feature": "disk_write_mb_per_s",
+      "importance": 0.0036440306077171933
+    },
+    {
+      "feature": "files_modified_per_s",
+      "importance": 0.0033148546916591157
+    },
+    {
+      "feature": "new_conn_per_s",
+      "importance": 0.002696994537690567
+    },
+    {
+      "feature": "files_deleted_per_s",
+      "importance": 0.002539343980172563
+    },
+    {
+      "feature": "beacon_regularity",
+      "importance": 0.0009786422091749847
+    },
+    {
+      "feature": "cpu_percent",
+      "importance": 0.0008411602105134289
+    },
+    {
+      "feature": "bytes_out_mb_per_s",
+      "importance": 0.0003983662105415675
+    },
+    {
+      "feature": "dns_nxdomain_per_s",
+      "importance": 0.0001357028832283206
+    }
+  ],
+  "ablation": {
+    "baseline_pr_auc": 0.9879840233457913,
+    "drops": [
+      {
+        "feature": "new_process_count",
+        "pr_auc_without": 0.9658737375725519
+      },
+      {
+        "feature": "ext_change_ratio",
+        "pr_auc_without": 0.9792012402394038
+      },
+      {
+        "feature": "files_renamed_per_s",
+        "pr_auc_without": 0.9826073380184575
+      },
+      {
+        "feature": "rare_dest_count",
+        "pr_auc_without": 0.982866423415182
+      },
+      {
+        "feature": "high_entropy_write_ratio",
+        "pr_auc_without": 0.9838617967328007
+      },
+      {
+        "feature": "out_in_ratio",
+        "pr_auc_without": 0.98436953829027
+      },
+      {
+        "feature": "bytes_out_mb_per_s",
+        "pr_auc_without": 0.9855640996685854
+      },
+      {
+        "feature": "dns_nxdomain_per_s",
+        "pr_auc_without": 0.9858493541418538
+      },
+      {
+        "feature": "write_entropy_mean",
+        "pr_auc_without": 0.985960926107776
+      },
+      {
+        "feature": "distinct_dirs_touched",
+        "pr_auc_without": 0.9859667502177979
+      },
+      {
+        "feature": "files_deleted_per_s",
+        "pr_auc_without": 0.9860094433276301
+      },
+      {
+        "feature": "cpu_percent",
+        "pr_auc_without": 0.9860537331865699
+      },
+      {
+        "feature": "smb_distinct_hosts",
+        "pr_auc_without": 0.9862979313423608
+      },
+      {
+        "feature": "suspicious_cmd_count",
+        "pr_auc_without": 0.9866368353678351
+      },
+      {
+        "feature": "files_modified_per_s",
+        "pr_auc_without": 0.9867653680753482
+      },
+      {
+        "feature": "beacon_regularity",
+        "pr_auc_without": 0.9871295940866939
+      },
+      {
+        "feature": "new_conn_per_s",
+        "pr_auc_without": 0.9875300647745842
+      },
+      {
+        "feature": "disk_write_mb_per_s",
+        "pr_auc_without": 0.9879682831029554
+      }
+    ]
+  },
+  "sha256": "72332d814f46639b03f05ffe50fa658d5db5fee7ac9a16962ca43cfdcead5345"
+}

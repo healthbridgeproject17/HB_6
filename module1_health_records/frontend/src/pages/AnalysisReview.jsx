@@ -29,8 +29,17 @@ function useJob(jobId) {
 }
 
 const initialLab = (r) => ({ value: String(r.value), unit: r.unit || '', reference: r.reference?.text || '', flag: r.printed_flag || '', accepted: false, remove: false });
-const initialRx = (it) => ({ medicine: it.medicine.printed || '', strength: it.strength.printed || '', dose: it.dose.printed || '', route: it.route.printed || '',
-  frequency: it.frequency.printed || '', duration: it.duration.printed || '', accepted: false, remove: false });
+// the tidy version of what was read ('500 mg', not '500mg'); rows left untouched send no edits
+const tidyFrequency = (t) => (t || '').replace(/([A-Za-z])\.(?=[A-Za-z])/g, '$1, ').replace(/\s*,\s*/g, ', ').replace(/^./, (c) => c.toUpperCase());
+const rxBase = (it) => ({
+  medicine: it.medicine.value || it.medicine.printed || '',
+  strength: it.strength.value?.text || it.strength.printed || '',
+  dose: it.dose.value?.text || it.dose.printed || '',
+  route: it.route.value?.text || it.route.printed || '',
+  frequency: tidyFrequency(it.frequency.printed),
+  duration: it.duration.value?.text || it.duration.printed || '',
+});
+const initialRx = (it) => ({ ...rxBase(it), accepted: false, remove: false });
 const RX_FIELDS = ['medicine', 'strength', 'dose', 'route', 'frequency', 'duration'];
 
 function LabRow({ r, draft, onChange, onLocate, selected, readOnly }) {
@@ -155,7 +164,8 @@ export default function AnalysisReview() {
       const e = {};
       if (d.remove) e.remove = true;
       else {
-        RX_FIELDS.forEach((f) => { if (d[f] !== (it[f].printed || '')) e[f] = d[f]; });
+        const base = rxBase(it);
+        RX_FIELDS.forEach((f) => { if (d[f] !== base[f]) e[f] = d[f]; });
         if (d.accepted) e.accepted = true;
       }
       if (Object.keys(e).length) out.prescription_items[i] = e;

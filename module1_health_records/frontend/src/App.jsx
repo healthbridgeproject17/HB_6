@@ -9,6 +9,7 @@ import PatientDetail from './pages/staff/PatientDetail.jsx';
 import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import ChangePassword from './pages/ChangePassword.jsx';
 import AnalysisReview from './pages/AnalysisReview.jsx';
+import SecurityMonitor from './pages/admin/SecurityMonitor.jsx';
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="/patient" element={<RequireRole roles={['patient']}><PatientDashboard /></RequireRole>} />
         <Route path="/doctor" element={<RequireRole roles={['doctor']}><DoctorHome /></RequireRole>} />
         <Route path="/admin" element={<RequireRole roles={['admin']}><AdminDashboard /></RequireRole>} />
+        <Route path="/admin/security" element={<RequireRole roles={['admin']}><SecurityMonitor /></RequireRole>} />
         <Route path="/staff/patients/:id" element={<RequireRole roles={['doctor', 'admin']}><PatientDetail /></RequireRole>} />
       </Route>
 

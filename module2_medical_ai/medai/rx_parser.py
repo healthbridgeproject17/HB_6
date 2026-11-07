@@ -100,14 +100,17 @@ def parse_duration(text):
 
 
 def check_medicine(printed):
+    """Is this a known medicine? If only spacing or capital letters differ from a known name
+    (e.g. 'Sodiumbicarbonate'), the proper form is used for display; anything else is only
+    SUGGESTED, never substituted."""
     name = re.sub(r"^(tab|tablet|cap|capsule|syp|syrup|inj|injection)\.?\s*", "", printed.strip(), flags=re.I)
     name = re.split(r"\d", name)[0].strip() or name
     key = squash_name(name)
     known = {squash_name(m): m for m in MEDICINES}
     if key in known:
-        return {"name": name, "recognised": True, "suggestion": None}
+        return {"name": known[key].capitalize(), "recognised": True, "suggestion": None, "known": known[key]}
     close = difflib.get_close_matches(key, list(known), n=1, cutoff=0.8)
-    return {"name": name, "recognised": False, "suggestion": known[close[0]] if close else None}
+    return {"name": name, "recognised": False, "suggestion": known[close[0]] if close else None, "known": None}
 
 
 def _field(printed, parsed, confidence):
@@ -128,7 +131,7 @@ def _build_item(parts, source, quality_poor):
         issues.append(f"Two readings of the medicine name disagree ('{med_text}' and '{med_alt}'). Check the original.")
     check = check_medicine(med_text) if med_text else {"name": None, "recognised": False, "suggestion": None}
     item["medicine"] = {"value": check["name"], "printed": med_text, "confidence": round(med_conf, 3) if med_text else None,
-                        "status": "ok" if med_text else "missing", "recognised": check["recognised"], "suggestion": check["suggestion"]}
+                        "status": "ok" if med_text else "missing", "recognised": check["recognised"], "suggestion": check["suggestion"], "known": check["known"]}
     if med_text:
         confs.append(med_conf)
         if not check["recognised"]:

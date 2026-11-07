@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../../api/client.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useLoad } from '../../hooks.js';
@@ -139,9 +140,12 @@ export default function AdminDashboard() {
   const [reloadKey, setReloadKey] = useState(0);
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Admin dashboard</h1>
-        <p className="text-sm text-slate-500">Manage accounts and review activity. Admins cannot write clinical entries.</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Admin dashboard</h1>
+          <p className="text-sm text-slate-500">Manage accounts and review activity. Admins cannot write clinical entries.</p>
+        </div>
+        <Link to="/admin/security" className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700">🛡️ Security monitor</Link>
       </div>
       <Tabs active={tab} onChange={setTab} tabs={[['users', 'Accounts', '👥'], ['doctor', 'Add doctor', '🩺'], ['patients', 'Patients', '🧑'], ['audit', 'Audit log', '🛡️']]} />
       {tab === 'users' && <Users reloadKey={reloadKey} />}

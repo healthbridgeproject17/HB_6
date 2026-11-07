@@ -242,7 +242,7 @@ def test_patient_confirmed_prescriptions_are_drafts_and_never_enter_the_tracker(
     assert len(rows) == 3 and {r.status for r in rows} == {"draft"} and all(r.doctor_id is None and r.confirmed_at is None for r in rows)
     assert all(r.source_document_id for r in rows)
     metformin = next(r for r in rows if r.medicine == "Metformin")
-    assert (metformin.strength, metformin.dose, metformin.route, metformin.frequency, metformin.duration) == ("500 mg", "1 tablet", "Oral", "Twice daily after food", "30 days")
+    assert (metformin.strength, metformin.dose, metformin.route, metformin.frequency, metformin.duration) == ("500 mg", "1 tablet", "oral", "Twice daily after food", "30 days")
     med = client.get(f"/api/v1/patients/{pid}/medication", headers=auth(t)).get_json()["medication"]
     assert med == []                                                              # drafts are not trackable
 
@@ -305,7 +305,7 @@ def test_documents_with_confirmed_results_cannot_be_deleted_but_unconfirmed_anal
     review(client, t, j2, confirm=True)
     blocked = client.delete(f"/api/v1/documents/{d2}", headers=auth(t))
     assert blocked.status_code == 409 and "cannot be deleted" in blocked.get_json()["error"]
-    assert Document.query.get(d2) is not None
+    assert db.session.get(Document, d2) is not None
 
 
 def test_lists_and_visibility_of_patient_analyses(client):
@@ -316,3 +316,12 @@ def test_lists_and_visibility_of_patient_analyses(client):
     assert len(listing) == 1 and listing[0]["document_name"] == "meena_kidney_panel_critical.pdf" and listing[0]["level"] == "urgent"
     assert client.get(f"/api/v1/patients/{pid}/analyses", headers=auth(t2)).status_code == 403
     assert client.get(f"/api/v1/patients/{pid}/lab-results", headers=auth(t2)).status_code == 403
+
+
+def test_saved_prescriptions_use_tidy_text(client):
+    from app.routes.analysis import rx_text
+    item = {"strength": {"status": "ok", "value": {"text": "500 mg"}, "printed": "500mg"}, "dose": {"status": "ok", "value": {"text": "1 tablet"}, "printed": "1tablet"},
+            "route": {"status": "ok", "value": {"text": "oral"}, "printed": "Oral"}, "duration": {"status": "ok", "value": {"text": "14 days"}, "printed": "14days"},
+            "frequency": {"status": "ok", "value": {}, "printed": "once daily.morning"}}
+    assert [rx_text(item, f) for f in ("strength", "dose", "route", "duration", "frequency")] == ["500 mg", "1 tablet", "oral", "14 days", "Once daily, morning"]
+    assert rx_text({"frequency": {"status": "missing"}}, "frequency") is None

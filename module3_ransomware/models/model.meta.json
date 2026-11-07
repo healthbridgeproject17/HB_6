@@ -1,0 +1,37 @@
+{
+  "library": "scikit-learn",
+  "trained_on": "synthetic telemetry",
+  "seed": 42,
+  "test_pr_auc": 0.9879840233457913,
+  "test_detection_rate": 1.0,
+  "rwdetect_version": "0.1",
+  "kind": "gradient_boosting",
+  "threshold": 0.7941804440713099,
+  "rule": {
+    "k": 2,
+    "m": 3,
+    "cooldown": 12
+  },
+  "features": [
+    "files_modified_per_s",
+    "files_renamed_per_s",
+    "files_deleted_per_s",
+    "ext_change_ratio",
+    "write_entropy_mean",
+    "high_entropy_write_ratio",
+    "distinct_dirs_touched",
+    "new_process_count",
+    "suspicious_cmd_count",
+    "cpu_percent",
+    "disk_write_mb_per_s",
+    "new_conn_per_s",
+    "smb_distinct_hosts",
+    "dns_nxdomain_per_s",
+    "bytes_out_mb_per_s",
+    "out_in_ratio",
+    "rare_dest_count",
+    "beacon_regularity"
+  ],
+  "saved_at": "2026-11-04T01:59:31.128464+00:00",
+  "sha256": "72332d814f46639b03f05ffe50fa658d5db5fee7ac9a16962ca43cfdcead5345"
+}

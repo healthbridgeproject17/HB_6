@@ -139,7 +139,7 @@ def test_delete_rules_and_file_removed(client):
     theirs = upload(client, doc, pid, PDF, "doctor.pdf").get_json()["document"]["id"]
 
     folder = client.app_ref.config["UPLOAD_FOLDER"]
-    stored = Document.query.get(mine).stored_path
+    stored = db.session.get(Document, mine).stored_path
     assert os.path.isfile(os.path.join(folder, stored))
 
     assert client.delete(f"/api/v1/documents/{mine}", headers=auth(doc)).status_code == 403   # doctor can't delete patient's

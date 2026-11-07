@@ -21,7 +21,8 @@ def unit_text(r):
 
 
 def _tidy(text):
-    text = re.sub(r"(?<=[A-Za-z])(?=\d)", " ", text or "")  # 'more than90' -> 'more than 90'
+    text = re.sub(r"(?<=[A-Za-z])(?=\d)", " ", text or "")        # 'more than90' -> 'more than 90'
+    text = re.sub(r"(?<=[A-Za-z])\.(?=[A-Za-z])", ", ", text)     # 'daily.morning' -> 'daily, morning' (a comma read as a full stop)
     return re.sub(r"\s*,\s*", ", ", text).strip()
 
 
@@ -146,8 +147,7 @@ def _sentence(item):
 def _prescription_report(a):
     items = []
     for it in a["prescription_items"]:
-        key = (it["medicine"]["suggestion"] if not it["medicine"]["recognised"] else (it["medicine"]["value"] or "")).lower()
-        purpose = MEDICINE_INFO.get(key if it["medicine"]["recognised"] else (it["medicine"]["value"] or "").lower())
+        purpose = MEDICINE_INFO.get(it["medicine"].get("known") or (it["medicine"]["value"] or "").lower()) if it["medicine"]["recognised"] else None
         missing = [f for f in ("strength", "dose", "frequency", "duration") if it[f]["status"] != "ok"]
         items.append({"medicine": it["medicine"]["value"], "instructions": _sentence(it), "purpose": purpose or "Ask your doctor or pharmacist what this medicine is for.",
                       "missing_fields": missing, "needs_review": it["needs_review"], "issues": it["issues"], "evidence": it["source"]})

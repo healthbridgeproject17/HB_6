@@ -81,7 +81,7 @@ export function Badge({ tone = 'slate', children }) {
 export function Tabs({ tabs, active, onChange }) {
   return (
     <>
-      <div className="hidden gap-1 overflow-x-auto border-b border-slate-200 sm:flex">
+      <div className="hidden gap-1 overflow-x-auto overflow-y-hidden border-b border-slate-200 sm:flex">
         {tabs.map(([key, label]) => (
           <button
             key={key}
