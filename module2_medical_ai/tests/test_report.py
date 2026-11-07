@@ -130,7 +130,7 @@ def test_prescription_report_reads_like_instructions_and_stays_a_draft():
     p = analyze("rahul_prescription.pdf")["report"]["patient"]
     assert p["type"] == "prescription" and "DRAFT" in p["confirm"]
     first = p["items"][0]
-    assert first["instructions"].startswith("Metformin 500 mg: take 1 tablet by oral, twice daily after food, for 30 days") or "Metformin 500 mg" in first["instructions"]
+    assert first["instructions"] == "Metformin 500 mg: take 1 tablet by mouth, twice daily after food, for 30 days."
     assert "blood sugar" in first["purpose"] and not first["missing_fields"]
     assert p["medicines"] == NO_MEDICINE_CHANGES
 
@@ -160,3 +160,14 @@ def test_text_version_renders_with_the_safety_lines(name):
 def test_shared_advice_is_not_repeated_in_the_text_version():
     text = to_text(analyze("meena_kidney_panel_critical.pdf")["report"])
     assert text.count("Cut down on salt") == 1
+
+
+def test_unreadable_unit_is_never_shown_as_garbage():
+    text = to_text(analyze("meena_kidney_panel_critical_scan.jpg", {"name": "Meena Rajan", "sex": "female"})["report"])
+    assert "[unit unclear]" in text and "p/6" not in text
+    assert "more than 90" in text and "more than90" not in text
+
+
+def test_related_results_say_when_advice_is_shared():
+    text = to_text(analyze("meena_kidney_panel_critical.pdf")["report"])
+    assert "same as for the related results above" in text

@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client.js';
 import { useLoad } from '../hooks.js';
 import CameraCapture from './CameraCapture.jsx';
+import { LEVEL_STYLE } from './ReportView.jsx';
 import { Alert, Badge, Button, Card, Field, Loading, Modal, Select, fmtDateTime, fmtSize } from './ui.jsx';
 
 const TYPE_LABEL = { prescription: 'Prescription', lab_report: 'Lab / medical report', other: 'Other document' };
@@ -37,7 +39,11 @@ function Viewer({ doc, onClose }) {
 
 // Upload a report, prescription or other document: choose a file or take a photo.
 export default function DocumentsPanel({ patientId }) {
+  const navigate = useNavigate();
   const { data, loading, error, reload } = useLoad(() => api(`/patients/${patientId}/documents`).then((r) => r.documents), [patientId]);
+  const analyses = useLoad(() => api(`/patients/${patientId}/analyses`).then((r) => r.analyses), [patientId]);
+  const latest = {};
+  (analyses.data || []).forEach((a) => { if (!latest[a.document_id]) latest[a.document_id] = a; });
   const [docType, setDocType] = useState('lab_report');
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -91,6 +97,17 @@ export default function DocumentsPanel({ patientId }) {
       setMsg({ kind: 'error', text: err.message });
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function analyse(doc) {
+    setMsg({ kind: 'error', text: '' });
+    try {
+      const r = await api(`/documents/${doc.id}/analyze`, { method: 'POST' });
+      navigate(`/analysis/${r.job.id}`);
+    } catch (err) {
+      if (err.status === 409 && latest[doc.id]) navigate(`/analysis/${latest[doc.id].id}`);
+      else setMsg({ kind: 'error', text: err.message });
     }
   }
 
@@ -153,15 +170,23 @@ export default function DocumentsPanel({ patientId }) {
                   <span>{fmtDateTime(d.uploaded_at)}</span>
                   {d.uploaded_by && <span>by {d.uploaded_by}</span>}
                 </div>
+                {latest[d.id] && (
+                  <Link to={`/analysis/${latest[d.id].id}`} className="mt-1 inline-flex items-center gap-2 text-xs text-teal-700 hover:underline">
+                    {latest[d.id].status === 'failed' ? 'Analysis failed' : ['queued', 'running'].includes(latest[d.id].status) ? 'Analysing…'
+                      : `Analysed${latest[d.id].level ? ' · ' + latest[d.id].level.replace('_', ' ') : ''} · ${latest[d.id].review_status === 'confirmed' ? 'confirmed' : 'needs your review'}`}
+                    {latest[d.id].level && <span aria-hidden="true">{LEVEL_STYLE[latest[d.id].level]?.icon}</span>}
+                  </Link>
+                )}
               </div>
               <div className="space-x-1">
+                <Button variant="ghost" onClick={() => analyse(d)}>{latest[d.id] ? 'Analyse again' : 'Analyse'}</Button>
                 <Button variant="ghost" onClick={() => setViewing(d)}>View</Button>
                 {d.can_delete && <Button variant="ghost" onClick={() => remove(d)}>Delete</Button>}
               </div>
             </li>
           ))}
         </ul>
-        <p className="mt-3 text-xs text-slate-400">AI analysis of these documents (extraction, summary and recommendations) is added in Module 2.</p>
+        <p className="mt-3 text-xs text-slate-400">“Analyse” reads the document, checks the values, and prepares a plain-language report. You review and correct it before anything is saved.</p>
       </Card>
 
       {camera && <CameraCapture onClose={() => setCamera(false)} onCapture={(f) => { setCamera(false); pick(f); }} />}

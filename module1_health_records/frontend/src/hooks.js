@@ -18,3 +18,18 @@ export function useLoad(loader, deps = []) {
   const reload = useCallback(() => setTick((t) => t + 1), []);
   return { ...state, reload };
 }
+
+// true on large screens (desktop layout), false on phones and tablets
+export function useIsDesktop() {
+  const query = '(min-width: 1024px)';
+  const get = () => (typeof window !== 'undefined' && window.matchMedia ? window.matchMedia(query).matches : true);
+  const [value, setValue] = useState(get);
+  useEffect(() => {
+    if (!window.matchMedia) return undefined;
+    const mq = window.matchMedia(query);
+    const on = () => setValue(mq.matches);
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+  return value;
+}

@@ -9,3 +9,5 @@ bcrypt==4.2.0
 pytest==8.3.2
 Pillow==10.4.0
 cryptography==50.0.2
+# Module 2 (document analysis) libraries, so "Analyse" works inside this same server
+-r ../../module2_medical_ai/requirements.txt

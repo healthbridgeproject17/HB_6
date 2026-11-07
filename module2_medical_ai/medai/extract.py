@@ -101,7 +101,7 @@ def _finish_ocr_page(number, lines, gray, notes, quality, engine_used):
     }, warnings
 
 
-def extract_document(data: bytes, engine: str = "auto") -> dict:
+def extract_document(data: bytes, engine: str = "auto", keep_images: bool = False) -> dict:
     started = time.time()
     if not data:
         raise ExtractionError("The file is empty.")
@@ -128,14 +128,20 @@ def extract_document(data: bytes, engine: str = "auto") -> dict:
             text = page.get_text().strip()
             if len(text) >= MIN_TEXT_CHARS:
                 lines = _pdf_lines(page)
-                pages.append({"page": i + 1, "method": "pdf_text", "engine": None, "width": round(page.rect.width, 1),
-                              "height": round(page.rect.height, 1), "text": "\n".join(l["text"] for l in lines), "lines": lines,
-                              "mean_confidence": 1.0, "quality": {"label": "good", "issues": []}, "preprocessing": []})
+                entry = {"page": i + 1, "method": "pdf_text", "engine": None, "width": round(page.rect.width, 1),
+                         "height": round(page.rect.height, 1), "text": "\n".join(l["text"] for l in lines), "lines": lines,
+                         "mean_confidence": 1.0, "quality": {"label": "good", "issues": []}, "preprocessing": []}
+                if keep_images:
+                    shot = page.get_pixmap(matrix=pymupdf.Matrix(1.6, 1.6), alpha=False)
+                    entry["_image"] = np.frombuffer(shot.samples, np.uint8).reshape(shot.height, shot.width, 3)[:, :, ::-1].copy()
+                pages.append(entry)
                 continue
             pix = page.get_pixmap(matrix=pymupdf.Matrix(OCR_DPI / 72, OCR_DPI / 72), alpha=False)
             img = cv2.cvtColor(np.frombuffer(pix.samples, np.uint8).reshape(pix.height, pix.width, 3), cv2.COLOR_RGB2BGR)
             engine_used, lines, gray, notes, quality = _ocr_page(img, engine)
             result, page_warnings = _finish_ocr_page(i + 1, lines, gray, notes, quality, engine_used)
+            if keep_images:
+                result["_image"] = gray
             pages.append(result)
             warnings += [f"Page {i + 1}: {w}" for w in page_warnings]
         page_count = total
@@ -146,6 +152,8 @@ def extract_document(data: bytes, engine: str = "auto") -> dict:
             raise ExtractionError("The image is damaged or cannot be opened.")
         engine_used, lines, gray, notes, quality = _ocr_page(img, engine)
         result, page_warnings = _finish_ocr_page(1, lines, gray, notes, quality, engine_used)
+        if keep_images:
+            result["_image"] = gray
         pages.append(result)
         warnings += page_warnings
         page_count = 1

@@ -2,6 +2,8 @@
 means, how it may affect you, general self-care), when to see a doctor.
 Every statement about a value carries a pointer to where it was read. All wording
 comes from knowledge.py, which a doctor reviews. No medicine advice, ever."""
+import re
+
 from .knowledge import MEDICINE_INFO, PATTERNS, T
 
 NO_MEDICINE_CHANGES = ("Do not start, stop or change any medicine because of this report. Talk to your doctor first.")
@@ -13,14 +15,24 @@ GENERIC = {
 }
 
 
+def unit_text(r):
+    """A unit that could not be read is shown as such, never as garbled text."""
+    return r["unit"] if r.get("unit_status") in ("ok", "unexpected") and r["unit"] else "[unit unclear]"
+
+
+def _tidy(text):
+    text = re.sub(r"(?<=[A-Za-z])(?=\d)", " ", text or "")  # 'more than90' -> 'more than 90'
+    return re.sub(r"\s*,\s*", ", ", text).strip()
+
+
 def _value_text(r):
-    return f"{r['value']:g} {r['unit'] or ''}".strip()
+    return f"{r['value']:g} {unit_text(r)}".strip()
 
 
 def _range_text(r):
     i = r["interpretation"]
     if r.get("reference") and i["range_used"] and i["range_used"]["source"] == "printed":
-        return r["reference"]["text"]
+        return _tidy(r["reference"]["text"])
     ru = i["range_used"]
     if not ru:
         return ""
@@ -110,6 +122,11 @@ def _lab_report(a):
             "questions_for_doctor": questions, "notes": notes, "medicines": NO_MEDICINE_CHANGES}
 
 
+ROUTE_PHRASE = {"oral": "by mouth", "intravenous": "into a vein (IV)", "intramuscular": "by injection into a muscle", "subcutaneous": "by injection under the skin",
+                "topical": "on the skin", "sublingual": "under the tongue", "inhalation": "by inhaling", "nasal": "into the nose", "rectal": "rectally",
+                "ophthalmic": "into the eye", "otic": "into the ear"}
+
+
 def _sentence(item):
     def part(f, fmt="{}"):
         v = item[f]["value"]
@@ -120,8 +137,8 @@ def _sentence(item):
     name = item["medicine"]["value"] or "(name not detected)"
     pieces = [name + (f" {strength}" if strength else " [strength not detected]")]
     take = f"take {dose}" if dose else "dose [not detected]"
-    take += f" by {route}" if route else ""
-    when = f", {item['frequency']['printed'].lower()}" if item["frequency"]["status"] != "missing" else ", frequency [not detected]"
+    take += f" {ROUTE_PHRASE.get(route, route)}" if route else ""
+    when = f", {_tidy(item['frequency']['printed']).lower()}" if item["frequency"]["status"] != "missing" else ", frequency [not detected]"
     for_ = f", for {dur}" if dur else ", duration [not detected]"
     return f"{pieces[0]}: {take}{when}{for_}."
 
@@ -181,11 +198,15 @@ def to_text(report):
         seen = set()  # related results (e.g. kidney tests) share advice: say it once
         for c in p["concerns"]:
             out += [c["headline"] + ("  [CHECK THIS VALUE]" if c["needs_review"] else ""), f"  What it is: {c.get('measures') or ''}", f"  What it means: {c['meaning']}"]
+            shared = False
             for label, key in (("How it may affect you", "may_affect"), ("What you can do", "self_care"), ("See a doctor sooner if", "see_doctor_sooner_if")):
                 fresh = [x for x in c[key] if x not in seen]
+                shared = shared or (len(fresh) < len(c[key]))
                 seen.update(fresh)
                 if fresh:
                     out += [f"  {label}:"] + [f"    - {x}" for x in fresh]
+            if shared:
+                out.append("  (Other advice for this result is the same as for the related results above.)")
             out.append("")
         if p["patterns"]:
             out += ["Putting results together:"] + [f"  * {x['label']}: {x['explanation']}" for x in p["patterns"]] + [""]

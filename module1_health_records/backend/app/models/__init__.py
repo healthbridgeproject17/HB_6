@@ -6,3 +6,4 @@ from .clinical import (  # noqa: F401
     MedicationLog,
     AuditLog,
 )
+from .analysis import AnalysisJob, LabResult  # noqa: F401

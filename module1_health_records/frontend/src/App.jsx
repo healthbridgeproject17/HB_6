@@ -8,6 +8,7 @@ import DoctorHome from './pages/staff/DoctorHome.jsx';
 import PatientDetail from './pages/staff/PatientDetail.jsx';
 import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import ChangePassword from './pages/ChangePassword.jsx';
+import AnalysisReview from './pages/AnalysisReview.jsx';
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
       <Route path="/register" element={<Register />} />
 
       <Route element={<Shell />}>
+        <Route path="/analysis/:jobId" element={<RequireRole roles={['patient', 'doctor', 'admin']}><AnalysisReview /></RequireRole>} />
         <Route path="/change-password" element={<RequireRole roles={['patient', 'doctor', 'admin']} allowPending><ChangePassword /></RequireRole>} />
         <Route path="/patient" element={<RequireRole roles={['patient']}><PatientDashboard /></RequireRole>} />
         <Route path="/doctor" element={<RequireRole roles={['doctor']}><DoctorHome /></RequireRole>} />

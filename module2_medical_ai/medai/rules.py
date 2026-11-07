@@ -4,6 +4,7 @@ language model. Ranges and alert levels are commonly used ADULT values; they are
 a working draft that a doctor must review before any real-world use."""
 from .catalog import TESTS, normalize_unit
 
+RULES_VERSION = "draft-2026-11"  # change whenever a range, threshold or rule changes
 LEVELS = ["routine", "consult_soon", "consult_promptly", "urgent"]
 LEVEL_INFO = {
     "routine": ("Routine", "at your next regular check-up", "No urgent action is needed based on the values read."),
@@ -229,13 +230,15 @@ def assess(lab_results, patient=None, document=None):
         if i["status"] in ("low", "high") and i["severity"] not in ("normal", "borderline"):
             ru = i["range_used"]
             if ru and ru["source"] == "printed" and r.get("reference"):
-                rng = r["reference"]["text"]
+                import re as _re
+                rng = _re.sub(r"(?<=[A-Za-z])(?=\d)", " ", r["reference"]["text"])
             elif ru:
                 rng = (f"{ru['low']:g}-{ru['high']:g}" if ru["low"] is not None and ru["high"] is not None
                        else f"more than {ru['low']:g}" if ru["low"] is not None else f"less than {ru['high']:g}")
             else:
                 rng = ""
-            text = f"{r['test']} {r['value']:g} {r['unit'] or ''} is {i['status']} ({i['severity']}; range {rng})"
+            unit = r["unit"] if r.get("unit_status") in ("ok", "unexpected") and r["unit"] else "[unit unclear]"
+            text = f"{r['test']} {r['value']:g} {unit} is {i['status']} ({i['severity']}; range {rng})"
             if i["alert_reason"]:
                 text += f", {i['alert_reason']}"
             reasons.append({"level": i["level"], "text": text, "test": r["test"]})

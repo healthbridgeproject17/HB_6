@@ -10,6 +10,7 @@ import RecordsPanel from '../../components/RecordsPanel.jsx';
 import PrescriptionsPanel from '../../components/PrescriptionsPanel.jsx';
 import MedicationPanel from '../../components/MedicationPanel.jsx';
 import DocumentsPanel from '../../components/DocumentsPanel.jsx';
+import LabResultsPanel from '../../components/LabResultsPanel.jsx';
 
 // Doctor and admin view of one patient. What each role can DO is decided here
 // for the screen and enforced again by the backend.
@@ -31,12 +32,13 @@ export default function PatientDetail() {
       <PatientHeader patient={patient} />
       <Tabs
         active={tab} onChange={setTab}
-        tabs={[['records', 'Records', '📋'], ['prescriptions', 'Prescriptions', '📄'], ['medication', 'Medicines', '💊'], ['documents', 'Documents', '📎'], ['profile', 'Profile', '👤']]}
+        tabs={[['records', 'Records', '📋'], ['prescriptions', 'Prescriptions', '📄'], ['medication', 'Medicines', '💊'], ['documents', 'Documents', '📎'], ['results', 'Results', '🧪'], ['profile', 'Profile', '👤']]}
       />
       {tab === 'records' && <RecordsPanel patientId={patient.id} canCreate={isDoctor} canAmend={isDoctor || isAdmin} />}
       {tab === 'prescriptions' && <PrescriptionsPanel patientId={patient.id} canWrite={isDoctor} />}
       {tab === 'medication' && <MedicationPanel patientId={patient.id} canLog={false} />}
       {tab === 'documents' && <DocumentsPanel patientId={patient.id} />}
+      {tab === 'results' && <LabResultsPanel patientId={patient.id} />}
       {tab === 'profile' && <ProfileForm key={patient.id} patient={patient} canEdit={isAdmin} canPhoto={isAdmin} onChanged={reload} />}
     </div>
   );

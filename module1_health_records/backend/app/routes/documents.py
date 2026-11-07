@@ -129,6 +129,14 @@ def delete_document(doc_id):
     user = g.current_user
     if not (user.role == "admin" or doc.uploaded_by == user.id):
         return jsonify(error="You can only delete documents you uploaded."), 403
+    from ..models import AnalysisJob, LabResult, Prescription
+    from .analysis import delete_job_files
+    if (Prescription.query.filter_by(source_document_id=doc.id).first() or LabResult.query.filter_by(document_id=doc.id).first()
+            or AnalysisJob.query.filter_by(document_id=doc.id, review_status="confirmed").first()):
+        return jsonify(error="This document is the source of confirmed results or prescriptions, so it cannot be deleted."), 409
+    for job in AnalysisJob.query.filter_by(document_id=doc.id).all():
+        delete_job_files(job.id)
+        db.session.delete(job)
     stored = doc.stored_path
     patient_id = doc.patient_id
     db.session.delete(doc)

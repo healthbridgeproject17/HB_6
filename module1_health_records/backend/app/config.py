@@ -17,12 +17,17 @@ def _database_url():
     return url
 
 
+MEDAI_DEFAULT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "module2_medical_ai"))
 BASE_UPLOAD_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "uploads"))
 
 
 class Config:
     ENV_NAME = os.getenv("FLASK_ENV", "development").lower()
     DOCUMENT_ENCRYPTION_KEY = os.getenv("DOCUMENT_ENCRYPTION_KEY", "")
+    MEDAI_PATH = os.getenv("MEDAI_PATH", MEDAI_DEFAULT)
+    ANALYSIS_SYNC = False            # True runs the analysis inside the request (tests)
+    ANALYSIS_MAX_PER_HOUR = 20       # per user
+    ANALYSIS_STALE_MINUTES = 15
     LOGIN_MAX_FAILURES = 5
     LOGIN_LOCK_MINUTES = 15
     REGISTER_MAX_PER_IP_HOUR = 20
@@ -41,6 +46,7 @@ class Config:
 class TestConfig(Config):
     TESTING = True
     ENV_NAME = "testing"
+    ANALYSIS_SYNC = True
     DOCUMENT_ENCRYPTION_KEY = ""
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     UPLOAD_FOLDER = tempfile.mkdtemp(prefix="hb_test_uploads_")

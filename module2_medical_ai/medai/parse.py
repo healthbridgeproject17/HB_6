@@ -2,6 +2,8 @@
 import difflib
 import re
 
+import cv2
+
 from . import lab_parser, rules, rx_parser, summary
 from .catalog import squash_name
 from .extract import extract_document
@@ -61,9 +63,23 @@ def check_identity(printed_name, record_name, record_sex=None, printed_sex=None)
     return {"status": status, "message": messages[status] + sex_note if status != "match" or sex_note else messages[status]}
 
 
-def analyze_document(data: bytes, engine: str = "auto", patient: dict = None) -> dict:
-    """patient (optional): {"name": ..., "sex": ...} from the record, for the identity check."""
-    ex = extract_document(data, engine=engine)
+def _jpeg(img, max_width=1600):
+    if img.shape[1] > max_width:
+        f = max_width / img.shape[1]
+        img = cv2.resize(img, None, fx=f, fy=f, interpolation=cv2.INTER_AREA)
+    ok, buf = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 85])
+    return buf.tobytes()
+
+
+def analyze_document(data: bytes, engine: str = "auto", patient: dict = None, with_images: bool = False) -> dict:
+    """patient (optional): {"name": ..., "sex": ...} from the record, for the identity check.
+    with_images=True also returns result["_images"] = {page_number: JPEG bytes} (not JSON) for the review screen."""
+    ex = extract_document(data, engine=engine, keep_images=with_images)
+    images = {}
+    for pg in ex["pages"]:
+        img = pg.pop("_image", None)
+        if img is not None:
+            images[pg["page"]] = _jpeg(img)
     poor = any(p["quality"]["label"] == "poor" for p in ex["pages"])
     labs, unrecognized, rx_items, doc_type = [], [], [], "unknown"
     for page in ex["pages"]:
@@ -106,4 +122,7 @@ def analyze_document(data: bytes, engine: str = "auto", patient: dict = None) ->
         "extraction": {k: ex[k] for k in ("kind", "page_count", "mean_confidence", "ocr_engine", "elapsed_seconds", "pages")},
     }
     result["report"] = summary.build_report(result)
+    result["versions"] = {"engine": "medai-0.6", "rules": rules.RULES_VERSION}
+    if with_images:
+        result["_images"] = images
     return result
