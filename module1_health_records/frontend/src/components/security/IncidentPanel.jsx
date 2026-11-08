@@ -21,7 +21,7 @@ export default function IncidentPanel({ incident, busy, onAct }) {
   if (!incident) {
     return (
       <Panel title="Incident details">
-        <p className="text-sm text-slate-400">Select an incident from the list. When the monitor raises an alert, it appears here with the reasons and the actions you can take.</p>
+        <p className="text-sm text-slate-400">No alert is selected. When the detector raises an alert (an “incident”), it appears here with the reasons it was raised and the actions you can take: acknowledge, isolate (simulated) and close.</p>
       </Panel>
     );
   }

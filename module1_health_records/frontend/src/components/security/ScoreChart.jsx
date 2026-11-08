@@ -21,11 +21,14 @@ export default function ScoreChart({ windows, threshold }) {
   const points = windows.map((w, i) => `${x(i).toFixed(1)},${y(w.score).toFixed(1)}`).join(' ');
   const last = windows[windows.length - 1];
   const summary = last
-    ? `Model score over the last ${windows.length} windows. Latest score ${last.score.toFixed(2)}${threshold != null ? `, alert threshold ${threshold}` : ''}.`
-    : 'No windows yet.';
+    ? `Danger score over the last ${windows.length} checks. Latest score ${last.score.toFixed(2)}${threshold != null ? `, alert line ${Number(threshold).toFixed(2)}` : ''}.`
+    : 'No checks yet.';
 
   return (
     <figure>
+      <figcaption className="mb-2 text-xs text-slate-400">
+        Danger score of this computer over time (newest on the right). {last ? `Latest: ${last.score.toFixed(2)}.` : 'Nothing to show yet.'}
+      </figcaption>
       <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label={summary}>
         {[0, 0.5, 1].map((v) => (
           <g key={v}>
@@ -33,6 +36,8 @@ export default function ScoreChart({ windows, threshold }) {
             <text x={4} y={y(v) + 4} fontSize="11" fill="#64748b">{v.toFixed(1)}</text>
           </g>
         ))}
+        <text x={W - PAD.r - 4} y={y(1) + 14} fontSize="11" fill="#94a3b8" textAnchor="end">looks like ransomware</text>
+        <text x={W - PAD.r - 4} y={y(0) - 5} fontSize="11" fill="#94a3b8" textAnchor="end">normal</text>
         {windows.map((w, i) => PHASE_FILL[w.phase] && (
           <rect key={`p${w.seq}`} x={x(i) - step / 2} y={PAD.t} width={step} height={innerH} fill={PHASE_FILL[w.phase]} />
         ))}
@@ -45,11 +50,11 @@ export default function ScoreChart({ windows, threshold }) {
         ))}
       </svg>
       <figcaption className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400">
-        <span><span className="mr-1 inline-block h-2 w-2 rounded-full bg-emerald-400" />normal window</span>
-        <span><span className="mr-1 inline-block h-2 w-2 rounded-full bg-amber-400" />score above threshold</span>
-        <span><span className="mr-1 inline-block h-2 w-2 rounded-full bg-rose-500" />alert (2 of last 3 windows)</span>
-        <span><span className="mr-1 inline-block h-0 w-4 border-t border-dashed border-amber-400 align-middle" />threshold</span>
-        <span>Shaded: what the simulator was doing (recon / attack / sleep)</span>
+        <span><span className="mr-1 inline-block h-2 w-2 rounded-full bg-emerald-400" />normal check</span>
+        <span><span className="mr-1 inline-block h-2 w-2 rounded-full bg-amber-400" />suspicious (above the line)</span>
+        <span><span className="mr-1 inline-block h-2 w-2 rounded-full bg-rose-500" />ALERT (check that opened an incident)</span>
+        <span><span className="mr-1 inline-block h-0 w-4 border-t border-dashed border-amber-400 align-middle" />alert line</span>
+        <span>Coloured background: what the simulator was really doing</span>
       </figcaption>
     </figure>
   );
