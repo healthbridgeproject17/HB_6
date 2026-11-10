@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta, timezone
 
 from flask import Blueprint, current_app, g, jsonify, request
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies
 
 from ..extensions import db
 from ..models import AuditLog, Patient, User
+from ..utils import second_factor as sf
 from ..utils.audit import log_action
 from ..utils.decorators import role_required
 from ..utils.health_id import generate_health_id
@@ -15,7 +16,7 @@ bp = Blueprint("auth", __name__)
 
 def user_payload(user):
     data = {"id": user.id, "name": user.name, "email": user.email, "role": user.role,
-            "must_change_password": user.must_change_password}
+            "must_change_password": user.must_change_password, "two_factor_enabled": bool(user.totp_enabled)}
     if user.role == "patient" and user.patient:
         data["health_id"] = user.patient.health_id
     return data
@@ -25,6 +26,19 @@ def issue_token(user):
     return create_access_token(
         identity=str(user.id), additional_claims={"role": user.role, "tv": user.token_version}
     )
+
+
+def session_response(user, status=200):
+    """The website sends 'X-Auth-Mode: cookie': it then gets the login as an HttpOnly cookie and
+    never sees the token. Other callers (tests, tools) get the token in the reply as before."""
+    token = issue_token(user)
+    if request.headers.get("X-Auth-Mode") == "cookie":
+        response = jsonify(user=user_payload(user))
+        set_access_cookies(response, token)
+    else:
+        response = jsonify(access_token=token, user=user_payload(user))
+    response.status_code = status
+    return response
 
 
 def _since(**delta):
@@ -90,7 +104,7 @@ def register():
     db.session.commit()
 
     log_action(user.id, "register", "user", user.id)
-    return jsonify(access_token=issue_token(user), user=user_payload(user)), 201
+    return session_response(user, 201)
 
 
 @bp.post("/login")
@@ -117,8 +131,34 @@ def login():
         log_action(user.id, "login_wrong_portal", "user", user.id, detail=f"portal={portal}")
         return jsonify(error="Invalid email or password."), 401
 
+    if user.totp_enabled:
+        # password was right; the account also needs its second step before any login is issued
+        return jsonify(mfa_required=True, ticket=sf.make_ticket(user))
+
     log_action(user.id, "login", "user", user.id)
-    return jsonify(access_token=issue_token(user), user=user_payload(user))
+    return session_response(user)
+
+
+@bp.post("/login/2fa")
+def login_second_step():
+    """Second step: the ticket from /login plus a 6-digit code (or a backup code)."""
+    body = request.get_json(silent=True) or {}
+    data = sf.read_ticket(body.get("ticket"))
+    user = db.session.get(User, data["uid"]) if data else None
+    if user is None or not user.totp_enabled or user.token_version != data["tv"]:
+        return jsonify(error="That sign-in step expired. Enter your password again."), 401
+    if login_locked(user.email):
+        return jsonify(error="Too many failed attempts. Try again in "
+                             f"{current_app.config['LOGIN_LOCK_MINUTES']} minutes."), 429
+    if not user.is_active:
+        return jsonify(error="This account has been disabled."), 403
+    if not sf.check_code(user, body.get("code")):
+        db.session.rollback()
+        log_action(user.id, "login_failed", "user", user.id, detail=f"email={user.email}")
+        return jsonify(error="That code is not right."), 401
+    db.session.commit()
+    log_action(user.id, "login", "user", user.id, detail="two-factor")
+    return session_response(user)
 
 
 @bp.get("/me")
@@ -149,7 +189,7 @@ def change_password():
     user.token_version += 1
     db.session.commit()
     log_action(user.id, "password_changed", "user", user.id)
-    return jsonify(access_token=issue_token(user), user=user_payload(user))
+    return session_response(user)
 
 
 @bp.post("/logout")
@@ -160,4 +200,14 @@ def logout():
     user.token_version += 1
     db.session.commit()
     log_action(user.id, "logout", "user", user.id)
-    return jsonify(ok=True)
+    response = jsonify(ok=True)
+    unset_jwt_cookies(response)
+    return response
+
+
+@bp.post("/session/clear")
+def clear_session():
+    """Removes the login cookies from this browser (used when a session has already expired)."""
+    response = jsonify(ok=True)
+    unset_jwt_cookies(response)
+    return response

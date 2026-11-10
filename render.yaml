@@ -1,0 +1,53 @@
+# Render Blueprint for the HealthBridge backend. See docs/DEPLOYMENT.md for every step.
+# Values marked "sync: false" are asked for in the Render dashboard; they are never stored in git.
+services:
+  - type: web
+    name: healthbridge-api
+    runtime: python
+    # Pick a plan with enough memory. Module 2 (OCR) and Module 3 (model) libraries are large; plan for 2 GB or more.
+    plan: standard
+    rootDir: module1_health_records/backend
+    buildCommand: pip install -r requirements-deploy.txt
+    # Update the database tables, then start. ONE worker with threads: analysis jobs, simulations and rate
+    # limits live inside the process, so several worker processes would not see each other.
+    startCommand: flask --app run db upgrade && gunicorn run:app --workers 1 --threads 4 --timeout 120 --bind 0.0.0.0:$PORT
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.10
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: DOCUMENT_ENCRYPTION_KEY      # must come from: flask --app run generate-key   (a random string is not a valid key)
+        sync: false
+      - key: DATABASE_URL                 # your NeonDB connection string (production database)
+        sync: false
+      - key: CORS_ORIGINS                 # your website address, e.g. https://healthbridge.vercel.app
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ANALYSIS_WORKERS            # documents analysed at the same time; each one needs extra memory (start with 1 on a small plan)
+        value: "2"
+      - key: MAIL_BACKEND                 # smtp = really send "forgot password" emails
+        value: smtp
+      - key: FRONTEND_URL                 # your website address; used in the email link
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: UPLOAD_FOLDER
+        value: /var/data/uploads
+    disk:
+      name: healthbridge-files
+      mountPath: /var/data
+      sizeGB: 5

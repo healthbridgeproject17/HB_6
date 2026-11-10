@@ -43,6 +43,21 @@ def register_cli(app):
         click.echo("Admin password updated.")
 
 
+    @app.cli.command("reset-2fa")
+    @click.option("--email", required=True)
+    def reset_2fa(email):
+        """Turn off two-factor login for an account (lost phone and lost backup codes)."""
+        from .utils.audit import log_action
+        from .utils.second_factor import clear_two_factor
+        user = User.query.filter_by(email=email.strip().lower()).first()
+        if user is None:
+            raise click.ClickException("No account with that email.")
+        clear_two_factor(user)
+        user.token_version += 1
+        db.session.commit()
+        log_action(None, "two_factor_reset_cli", "user", user.id)
+        click.echo(f"Two-factor login turned off for {user.email}. Other sessions were signed out.")
+
     @app.cli.command("create-admin")
     @click.option("--name", prompt="Admin name")
     @click.option("--email", prompt="Admin email")

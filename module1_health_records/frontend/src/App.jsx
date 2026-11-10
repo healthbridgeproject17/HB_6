@@ -8,6 +8,9 @@ import DoctorHome from './pages/staff/DoctorHome.jsx';
 import PatientDetail from './pages/staff/PatientDetail.jsx';
 import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import ChangePassword from './pages/ChangePassword.jsx';
+import ForgotPassword from './pages/ForgotPassword.jsx';
+import ResetPassword from './pages/ResetPassword.jsx';
+import AccountSecurity from './pages/AccountSecurity.jsx';
 import AnalysisReview from './pages/AnalysisReview.jsx';
 import SecurityMonitor from './pages/admin/SecurityMonitor.jsx';
 
@@ -17,10 +20,13 @@ export default function App() {
       <Route path="/" element={<Landing />} />
       <Route path="/login/:portal" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       <Route element={<Shell />}>
         <Route path="/analysis/:jobId" element={<RequireRole roles={['patient', 'doctor', 'admin']}><AnalysisReview /></RequireRole>} />
         <Route path="/change-password" element={<RequireRole roles={['patient', 'doctor', 'admin']} allowPending><ChangePassword /></RequireRole>} />
+        <Route path="/account/security" element={<RequireRole roles={['patient', 'doctor', 'admin']}><AccountSecurity /></RequireRole>} />
         <Route path="/patient" element={<RequireRole roles={['patient']}><PatientDashboard /></RequireRole>} />
         <Route path="/doctor" element={<RequireRole roles={['doctor']}><DoctorHome /></RequireRole>} />
         <Route path="/admin" element={<RequireRole roles={['admin']}><AdminDashboard /></RequireRole>} />

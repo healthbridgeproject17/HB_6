@@ -11,7 +11,7 @@ from flask import current_app
 
 _module = None
 _executor = None
-ocr_lock = threading.Lock()   # the OCR engine is used by one job at a time
+_executor_lock = threading.Lock()
 
 
 class AnalysisUnavailable(RuntimeError):
@@ -41,9 +41,13 @@ def available():
 
 
 def executor():
+    """A small pool: up to ANALYSIS_WORKERS documents are analysed at the same time;
+    the rest wait in line (their job stays 'queued')."""
     global _executor
-    if _executor is None:
-        _executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="analysis")
+    with _executor_lock:
+        if _executor is None:
+            workers = max(1, min(int(current_app.config.get("ANALYSIS_WORKERS", 2)), 4))
+            _executor = ThreadPoolExecutor(max_workers=workers, thread_name_prefix="analysis")
     return _executor
 
 

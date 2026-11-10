@@ -64,8 +64,7 @@ def run_job(app, job_id):
             with open(os.path.join(app.config["UPLOAD_FOLDER"], doc.stored_path), "rb") as fh:
                 data = decrypt_bytes(fh.read())
             context = {"name": patient.user.name, "sex": patient.sex, "age": _age(patient.dob)}
-            with bridge.ocr_lock:
-                result = medai.analyze_document(data, patient=context, with_images=True)
+            result = medai.analyze_document(data, patient=context, with_images=True)
             images = result.pop("_images", {})
             os.makedirs(analysis_dir(job.id), exist_ok=True)
             for number, jpeg in images.items():

@@ -2,6 +2,7 @@
 install on Windows). Tesseract is used only if you choose it and it is installed."""
 import os
 import shutil
+import threading
 from dataclasses import dataclass
 
 import numpy as np
@@ -22,15 +23,17 @@ class OcrLine:
         return d
 
 
-_rapid = None
+_local = threading.local()
 
 
 def _rapidocr():
-    global _rapid
-    if _rapid is None:
+    """One OCR engine per thread, so several documents can be read at the same time
+    without sharing an engine between threads."""
+    engine = getattr(_local, "rapid", None)
+    if engine is None:
         from rapidocr_onnxruntime import RapidOCR
-        _rapid = RapidOCR()
-    return _rapid
+        engine = _local.rapid = RapidOCR()
+    return engine
 
 
 def _tesseract_cmd():
@@ -67,7 +70,10 @@ def _run_rapidocr(gray):
 
 
 def _run_tesseract(gray):
-    import pytesseract
+    try:
+        import pytesseract  # type: ignore[import-not-found]
+    except ImportError as exc:
+        raise RuntimeError("pytesseract is required for the tesseract OCR engine") from exc
     pytesseract.pytesseract.tesseract_cmd = _tesseract_cmd()
     data = pytesseract.image_to_data(gray, config="--psm 6", output_type=pytesseract.Output.DICT)
     groups = {}

@@ -1,0 +1,3 @@
+# Used by the hosting service (Render). On your own PC keep using requirements.txt.
+-r requirements.txt
+gunicorn==23.0.0

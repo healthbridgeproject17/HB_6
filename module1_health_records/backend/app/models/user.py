@@ -26,6 +26,11 @@ class User(db.Model):
     token_version = db.Column(db.Integer, nullable=False, default=0, server_default="0")
     must_change_password = db.Column(db.Boolean, nullable=False, default=False, server_default=db.false())
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
+    # two-factor login (authenticator app). The secret is stored encrypted; backup codes only as hashes.
+    totp_secret_enc = db.Column(db.Text)
+    totp_enabled = db.Column(db.Boolean, nullable=False, default=False, server_default=db.false())
+    totp_last_step = db.Column(db.BigInteger, nullable=False, default=0, server_default="0")
+    backup_code_hashes = db.Column(db.JSON)
 
     __table_args__ = (
         db.CheckConstraint("role IN ('patient','doctor','admin')", name="ck_users_role"),
@@ -65,3 +70,16 @@ class Doctor(db.Model):
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
 
     user = db.relationship("User", backref=db.backref("doctor", uselist=False))
+
+
+class PasswordResetToken(db.Model):
+    """One 'forgot password' link. Only a hash of the secret is stored, so a database leak
+    does not hand out working links. Single use, short life."""
+    __tablename__ = "password_reset_tokens"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
+    token_hash = db.Column(db.String(64), unique=True, nullable=False)
+    created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
+    expires_at = db.Column(db.DateTime(timezone=True), nullable=False)
+    used_at = db.Column(db.DateTime(timezone=True))

@@ -1,8 +1,14 @@
-// All calls to the Flask API go through here. The login token is kept in
-// sessionStorage (cleared when the browser tab closes) and sent on every call.
+// All calls to the Flask API go through here. The login lives in an HttpOnly cookie that the
+// browser sends by itself (JavaScript cannot read it). For changes (POST/PUT/PATCH/DELETE) we
+// also send the CSRF code, which the server puts in a separate readable cookie.
 const BASE = '/api/v1';
-let token = sessionStorage.getItem('hb_token');
+let signedIn = false;
 let onUnauthorized = null;
+
+function csrfToken() {
+  const match = document.cookie.split('; ').find((c) => c.startsWith('csrf_access_token='));
+  return match ? decodeURIComponent(match.split('=')[1]) : '';
+}
 
 export class ApiError extends Error {
   constructor(status, message) {
@@ -11,17 +17,12 @@ export class ApiError extends Error {
   }
 }
 
-export function setToken(value) {
-  token = value;
-  if (value) sessionStorage.setItem('hb_token', value);
-  else sessionStorage.removeItem('hb_token');
-}
-export const hasToken = () => Boolean(token);
+export const setSignedIn = (value) => { signedIn = Boolean(value); };
 export const setUnauthorizedHandler = (fn) => { onUnauthorized = fn; };
 
-export async function api(path, { method = 'GET', body, form, raw } = {}) {
-  const headers = {};
-  if (token) headers.Authorization = `Bearer ${token}`;
+export async function api(path, { method = 'GET', body, form, raw, quiet } = {}) {
+  const headers = { 'X-Auth-Mode': 'cookie' };
+  if (method !== 'GET') headers['X-CSRF-TOKEN'] = csrfToken();
   let payload;
   if (form) {
     payload = form; // browser sets the multipart header itself
@@ -32,7 +33,7 @@ export async function api(path, { method = 'GET', body, form, raw } = {}) {
 
   let res;
   try {
-    res = await fetch(BASE + path, { method, headers, body: payload });
+    res = await fetch(BASE + path, { method, headers, body: payload, credentials: 'same-origin' });
   } catch {
     throw new ApiError(0, 'Cannot reach the server. Is the API running?');
   }
@@ -45,7 +46,7 @@ export async function api(path, { method = 'GET', body, form, raw } = {}) {
   let data = null;
   try { data = await res.json(); } catch { /* empty body */ }
   if (!res.ok) {
-    if (res.status === 401 && token && onUnauthorized) onUnauthorized();
+    if (res.status === 401 && signedIn && !quiet && onUnauthorized) onUnauthorized();
     throw new ApiError(res.status, data?.error || data?.msg || 'Request failed');
   }
   return data;

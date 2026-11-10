@@ -10,7 +10,7 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
     _check_production_settings(app)
 
-    CORS(app, resources={r"/api/*": {"origins": app.config["CORS_ORIGINS"]}})
+    CORS(app, resources={r"/api/*": {"origins": app.config["CORS_ORIGINS"]}}, supports_credentials=True)
 
     db.init_app(app)
     jwt.init_app(app)
@@ -23,6 +23,10 @@ def create_app(config_class=Config):
     from .routes.auth import bp as auth_bp
     from .routes.admin import bp as admin_bp
     app.register_blueprint(auth_bp, url_prefix="/api/v1/auth")
+    from .routes.twofactor import bp as twofactor_bp
+    app.register_blueprint(twofactor_bp, url_prefix="/api/v1/auth")
+    from .routes.password_reset import bp as password_reset_bp
+    app.register_blueprint(password_reset_bp, url_prefix="/api/v1/auth")
     app.register_blueprint(admin_bp, url_prefix="/api/v1/admin")
 
     from .routes.patients import bp as patients_bp

@@ -19,6 +19,7 @@ export function Shell() {
             </div>
             <Badge tone="teal">{user?.role}</Badge>
             <Link to="/change-password" className="hidden text-sm text-slate-500 hover:text-teal-700 md:inline">Password</Link>
+            <Link to="/account/security" className="hidden text-sm text-slate-500 hover:text-teal-700 md:inline">Two-factor</Link>
             <Button variant="secondary" onClick={logout}>Log out</Button>
           </div>
         </div>

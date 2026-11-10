@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, current_app, jsonify
 from sqlalchemy import text
 
 from ..extensions import db
@@ -17,4 +17,6 @@ def health_db():
         db.session.execute(text("SELECT 1"))
         return jsonify(status="ok", database="connected")
     except Exception as exc:
-        return jsonify(status="error", database="unreachable", detail=str(exc)), 500
+        # the reason goes to the server log only; the error text can contain the database address
+        current_app.logger.warning("Database health check failed: %s", exc)
+        return jsonify(status="error", database="unreachable"), 500

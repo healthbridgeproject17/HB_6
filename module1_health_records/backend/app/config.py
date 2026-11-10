@@ -27,6 +27,7 @@ class Config:
     DOCUMENT_ENCRYPTION_KEY = os.getenv("DOCUMENT_ENCRYPTION_KEY", "")
     MEDAI_PATH = os.getenv("MEDAI_PATH", MEDAI_DEFAULT)
     ANALYSIS_SYNC = False            # True runs the analysis inside the request (tests)
+    ANALYSIS_WORKERS = int(os.getenv("ANALYSIS_WORKERS", "2"))   # documents analysed at the same time (1-4); each uses extra memory
     ANALYSIS_MAX_PER_HOUR = 20       # per user
     ANALYSIS_STALE_MINUTES = 15
     RWDETECT_PATH = os.getenv("RWDETECT_PATH", RWDETECT_DEFAULT)   # Module 3 folder (detection engine + trained model)
@@ -38,7 +39,19 @@ class Config:
     LOGIN_MAX_FAILURES = 5
     LOGIN_LOCK_MINUTES = 15
     REGISTER_MAX_PER_IP_HOUR = 20
-    UPLOAD_FOLDER = BASE_UPLOAD_DIR
+    # Email (password reset). MAIL_BACKEND "console" only writes to the server log (development);
+    # "smtp" really sends and needs the SMTP_* values.
+    MAIL_BACKEND = os.getenv("MAIL_BACKEND", "console").lower()
+    SMTP_HOST = os.getenv("SMTP_HOST", "")
+    SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+    SMTP_USER = os.getenv("SMTP_USER", "")
+    SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
+    MAIL_FROM = os.getenv("MAIL_FROM", "HealthBridge <no-reply@healthbridge.local>")
+    FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173").rstrip("/")   # used in email links
+    RESET_TOKEN_MINUTES = 30
+    RESET_MAX_PER_EMAIL_HOUR = 3
+    RESET_MAX_PER_IP_HOUR = 10
+    UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", BASE_UPLOAD_DIR)   # on a host, point this at a persistent disk
     MAX_PHOTO_BYTES = 2 * 1024 * 1024  # 2 MB
     MAX_DOCUMENT_BYTES = 10 * 1024 * 1024  # 10 MB per report/prescription
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret")
@@ -46,12 +59,19 @@ class Config:
     SQLALCHEMY_DATABASE_URI = _database_url()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=2)
+    # Login can travel two ways: the website uses an HttpOnly cookie (JavaScript cannot read it),
+    # while tests and tools may still send "Authorization: Bearer ...".
+    JWT_TOKEN_LOCATION = ["headers", "cookies"]
+    JWT_COOKIE_SECURE = ENV_NAME == "production"     # HTTPS only on the live site
+    JWT_COOKIE_SAMESITE = "Lax"
+    JWT_COOKIE_CSRF_PROTECT = True                   # cookie logins must send X-CSRF-TOKEN on changes
     CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",")
     MAX_CONTENT_LENGTH = 12 * 1024 * 1024  # whole request (file + form overhead)
 
 
 class TestConfig(Config):
     TESTING = True
+    MAIL_BACKEND = "memory"          # emails are kept in app.extensions["outbox"]
     ENV_NAME = "testing"
     ANALYSIS_SYNC = True
     MONITOR_SIM_SYNC = True
